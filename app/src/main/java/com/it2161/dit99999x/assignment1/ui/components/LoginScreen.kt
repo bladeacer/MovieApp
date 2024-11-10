@@ -59,45 +59,26 @@ fun LoginScreen(
             .offset(x = 35.dp, y=400.dp)
     ) {
 
-        Text(
-            text = "Enter user ID",
-            color = Color.Gray,
-            fontSize = 18.sp
-        )
-
         Spacer(modifier = Modifier.height(16.dp))
 
         TextField(
             value = userID,
             onValueChange = { userID = it },
-            label = { Text("User ID") },
+            label = { Text("Enter User ID") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             modifier = Modifier
                 .width(225.dp)
 
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Text(
-            text = "Enter password",
-            color = Color.White,
-            fontSize = 18.sp,
-        )
-
         Spacer(modifier = Modifier.height(16.dp))
-        if (showError) {
-            Text(
-                text = "User ID or password is incorrect",
-                color = Color.Red
-            )
-        }
+
 
         Spacer(modifier = Modifier.height(16.dp))
         TextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Password") },
+            label = { Text("Enter Password") },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             modifier = Modifier
@@ -107,7 +88,7 @@ fun LoginScreen(
 
         Column (
             modifier = Modifier
-                .offset(x = 250.dp, y = -(52.5).dp),
+                .offset(x = 255.dp, y = -(52.5).dp),
             horizontalAlignment = Alignment.End
         ) {
             TextButton(
@@ -115,6 +96,13 @@ fun LoginScreen(
             ) {
                 Text(if (passwordVisible) "Hide" else "Show")
             }
+        }
+
+        if (showError) {
+            Text(
+                text = "User ID or password is incorrect",
+                color = Color.Red
+            )
         }
 
         Row {
@@ -128,12 +116,9 @@ fun LoginScreen(
                         showError = true
                     }
                 },
-                // TODO: Add handle submission logic
-                // TODO: Allow user to submit credentials
 
 
                 modifier = Modifier
-                    .offset(x = 35.dp)
                     .background(Purple40),
             ) {
                 Text(
@@ -146,8 +131,8 @@ fun LoginScreen(
             TextButton(
                 onClick = onRegisterButtonClicked,
                 modifier = Modifier
-                    .offset(x = 105.dp)
-                    .background(Pink40)
+                    .offset(x = 69.dp)
+                    .background(Pink80)
             ) {
                 Text(
                     text = "Register",

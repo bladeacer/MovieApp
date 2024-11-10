@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -15,7 +16,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.sp
 import com.it2161.dit99999x.assignment1.ui.components.LoginScreen
 import com.it2161.dit99999x.assignment1.ui.components.RegisterUserScreen
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -44,7 +47,11 @@ fun MovieAppBar (
 //    navigateUp: () -> Unit,
 ) {
     CenterAlignedTopAppBar(
-        title = { Text(stringResource(currentScreenTitle)) },
+        title = {
+            Text (
+                text = stringResource(currentScreenTitle),
+                style = TextStyle(fontSize = 18.sp)
+            )},
 //        navigationIcon = {
 //            if (canNavigateBack) {
 //                Text("Test")
@@ -107,6 +114,9 @@ fun MovieViewerApp() {
                     onBackButtonClicked = {
                         navController.navigate(MovieScreen.Login.name)
                     },
+                    onRegisterButtonClicked = {
+                        navController.navigate(MovieScreen.Login.name)
+                    },
                     userProfile = userProfile,
                     modifier = Modifier
                         .fillMaxSize()
@@ -117,57 +127,6 @@ fun MovieViewerApp() {
             }
         }
 
-//        when (navState) {
-//            0 -> {
-//
-//                Column (
-//                    modifier = Modifier
-//                        .fillMaxSize()
-//                        .background(customBg)
-//
-//                ) {
-//                    LoginScreen()
-//                    Row {
-//                        TextButton(
-//                            onClick = {
-//                                navState = 1
-//                                // TODO: Add handle submission logic
-//                                // TODO: Allow user to submit credentials
-//                            },
-//
-//
-//                            modifier = Modifier
-//                                .offset(x = 35.dp)
-//                                .background(Color.Magenta),
-//                        ) {
-//                            Text(
-//                                text ="Login",
-//                                fontSize = 17.sp
-//                                )
-//                        }
-//
-//                        TextButton(
-//                            onClick = {
-//                                navState =  2
-//                            },
-//                            modifier = Modifier
-//                                .offset(x = 105.dp)
-//                                .background(Color.LightGray)
-//                        ) {
-//                            Text(
-//                                text = "Register",
-//                                fontSize = 17.sp
-//                            )
-//                        }
-//                    }
-//                }
-//            }
-//            1 -> {
-//                LandingScreen()
-//            }
-//            2 -> {
-//                RegisterUserScreen()
-//            }
 //            3 -> {
 //                ProfileScreen()
 //            }
