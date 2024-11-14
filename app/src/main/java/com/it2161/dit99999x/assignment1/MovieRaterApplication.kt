@@ -26,6 +26,11 @@ import org.json.JSONArray
 import java.io.File
 
 class MovieRaterApplication : Application() {
+    companion object{
+        lateinit var instance : MovieRaterApplication
+            private set
+    }
+
     var data = mutableListOf<MovieItem>()
         get() = field
         set(value) {
@@ -45,7 +50,7 @@ class MovieRaterApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-
+        instance = this
         //Loads Profile and Movie details
         loadData(applicationContext)
     }
@@ -64,7 +69,7 @@ class MovieRaterApplication : Application() {
                 val releaseDate = jsonObject.getString("release_date")
                 var rating = jsonObject.getString("rating")
                 val parts = rating.split("/")
-                if (parts.size > 2)
+                if (parts.size >= 2)
                     rating = parts[0]
                 else
                     rating = "0"
@@ -79,7 +84,9 @@ class MovieRaterApplication : Application() {
                     val commentsObj = comments.getJSONObject(i)
                     val user = commentsObj.getString("user")
                     val comment = commentsObj.getString("comment")
-                    val newComment = Comments(user, comment)
+                    val date = commentsObj.getString("date")
+                    val time = commentsObj.getString("time")
+                    val newComment = Comments(user, comment,date,time)
                     listOfComments.add(newComment)
 
                 }

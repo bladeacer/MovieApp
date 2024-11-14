@@ -1,32 +1,29 @@
 package com.it2161.dit99999x.assignment1.ui.components
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.it2161.dit99999x.assignment1.data.UserProfile
 import com.it2161.dit99999x.assignment1.ui.theme.*
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,20 +32,26 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.TextField
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.foundation.lazy.items
+//import androidx.compose.material3.SnackbarDuration
+//import androidx.compose.material3.SnackbarHost
+//import androidx.compose.material3.SnackbarHostState
+//import androidx.compose.runtime.rememberCoroutineScope
+import com.it2161.dit99999x.assignment1.MovieRaterApplication
+import kotlinx.coroutines.launch
+
 
 @Composable
 fun CustomDropdownMenu(
     options: List<String>,
     selectedOption: String,
-    onOptionSelected: (String) -> Unit
+    onOptionSelected: (String) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false)}
     val baseBg = Color(0xFFebebf6)
     Column (
         modifier = Modifier
-            .offset(x = 15.dp, y = -(12.dp))
+            .padding(10.dp, 0.dp, 0.dp, 0.dp)
     )
     {
         Button(
@@ -72,19 +75,21 @@ fun CustomDropdownMenu(
                 .fillMaxWidth(0.45f)
                 .fillMaxHeight(0.55f)
         ) {
-            options.forEach { option ->
-                TextButton(
-                    onClick = {
-                        onOptionSelected(option)
-                        expanded = false
-                    },
-                ) {
-                    Text(
-                        text = option,
-                        color = Color.DarkGray
-                    )
-                }
+            LazyColumn {
+                items(options) { option ->
+                    TextButton(
+                        onClick = {
+                            onOptionSelected(option)
+                            expanded = false
+                        },
+                    ) {
+                        Text(
+                            text = option,
+                            color = Color.DarkGray
+                        )
+                    }
 
+                }
             }
         }
     }
@@ -94,23 +99,22 @@ fun CustomDropdownMenu(
 fun RegisterUserScreen(
     onBackButtonClicked: () -> Unit,
     onRegisterButtonClicked: () -> Unit,
-    userProfile: UserProfile,
-    modifier: Modifier = Modifier
+    modifier: Modifier
 ) {
-
     var userName by remember { mutableStateOf("Hint: Enter user name") }
     var password by remember { mutableStateOf("Hint: Enter password") }
     var confirmPassword by remember { mutableStateOf("Hint: Enter password") }
     var email by remember { mutableStateOf("Hint: Enter email")}
     var gender by remember { mutableStateOf("No selection")}
     var mobileNumber by remember { mutableStateOf("Hint: Enter mobile number")}
-    var updates by remember { mutableStateOf(false) }
+    var (updates, setUpdate) = remember { mutableStateOf("Not selected") }
     var yearOfBirth by remember { mutableStateOf("Select Year of Birth") }
-    val toastState = remember {
-        SnackbarHostState()
-    }
     val options = (1920..2024).reversed().map { it.toString() }
-    val scope = rememberCoroutineScope()
+    var showToast by remember { mutableStateOf(false) }
+    var toastMessage by remember { mutableStateOf("") }
+
+//    val snackbarHostState = remember { SnackbarHostState() }
+//    val scope = rememberCoroutineScope()
 
     //    Check whether required fields are filled up by seeing if they
     //    are the same as the nonsensical default values, if they are display the toast and refuse
@@ -120,7 +124,7 @@ fun RegisterUserScreen(
 
     Column (
         modifier = Modifier
-            .offset(x = 35.dp, y=100.dp)
+            .padding(35.dp, 100.dp, 0.dp, 0.dp)
     ) {
 
         Text(
@@ -175,7 +179,7 @@ fun RegisterUserScreen(
             Text(
                 text = "Male",
                 modifier = Modifier
-                    .offset(y = 12.dp)
+                    .padding(0.dp, 12.dp, 0.dp, 0.dp)
             )
             RadioButton(
                 selected = gender == "Male",
@@ -184,7 +188,7 @@ fun RegisterUserScreen(
             Text(
                 text = "Female",
                 modifier = Modifier
-                    .offset(y = 12.dp)
+                    .padding(0.dp, 12.dp, 0.dp, 0.dp)
             )
             RadioButton(
                 selected = gender == "Female",
@@ -193,12 +197,12 @@ fun RegisterUserScreen(
         }
         Row (
             modifier = Modifier
-                .offset(y = -(8.dp))
+                .padding(0.dp, 0.dp, 8.dp, 0.dp)
         ){
             Text(
                 text = "Non-Binary",
                 modifier = Modifier
-                    .offset(y = 12.dp)
+                    .padding(0.dp, 12.dp, 0.dp, 0.dp)
             )
             RadioButton(
                 selected = gender == "Non-Binary",
@@ -207,7 +211,7 @@ fun RegisterUserScreen(
             Text(
                 text = "Prefer not to say",
                 modifier = Modifier
-                    .offset(y = 12.dp)
+                    .padding(0.dp, 12.dp, 0.dp, 0.dp)
             )
             RadioButton(
                 selected = gender == "Prefer not to say",
@@ -218,13 +222,19 @@ fun RegisterUserScreen(
         Spacer(modifier = Modifier.height(8.dp))
         Row{
             Text (
-                text = "Receive updates?"
+                text = "Receive updates?",
+                modifier = Modifier.padding(0.dp, 12.dp, 0.dp, 0.dp)
             )
             Checkbox(
-                checked = updates,
-                onCheckedChange = { updates = it },
+                checked = updates == "Yes",
+                onCheckedChange = {
+                    updates = (if (updates == "Yes") {
+                        setUpdate("No")
+                    } else {
+                        setUpdate("Yes")
+                    }).toString()
+                },
                 modifier = Modifier
-                    .offset(y = -(12.dp))
             )
         }
 
@@ -234,25 +244,54 @@ fun RegisterUserScreen(
 
         Row {
             Text(
-                text = "Year of birth"
+                text = "Year of birth",
+                modifier = Modifier.padding(0.dp, 10.dp, 0.dp, 0.dp)
             )
             CustomDropdownMenu(
                 options = options,
                 selectedOption = yearOfBirth,
                 onOptionSelected = {
                     yearOfBirth = it
-                }
+                },
             )
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         Row {
             TextButton(
                 onClick = {
-                    // TODO: Handle Register logic, write to UserProfile
-                    // Deny registering if required values not filled up
                     // Meaning check if they are the default values
-                    onRegisterButtonClicked()
+                    showToast = true
+                    if (userName == "Hint: Enter user name" || password == "Hint: Enter password"
+                        || confirmPassword == "Hint: Enter password" || email == "Hint: enter email"
+                        || gender == "No selection" || mobileNumber == "Hint: Enter mobile number"
+                        || yearOfBirth == "Select Year of birth"){
+                        // Deny registering if required values not filled up
+                        toastMessage = "An empty field was found"
+                    }
+                    else if (password != confirmPassword) {
+                        toastMessage = "Passwords do not match"
+                    }
+
+                    else {
+                        // TODO: Handle Register logic, write to UserProfile
+                        val updateVal = updates == "Yes"
+                        showToast = false
+                        MovieRaterApplication().userProfile = UserProfile(userName,
+                            password, email, gender, mobileNumber, updateVal, yearOfBirth)
+                        onRegisterButtonClicked()
+                    }
+
+//                    if (showToast) {
+//                        scope.launch {
+//                            snackbarHostState.showSnackbar(
+//                                message = toastMessage,
+//                                duration = SnackbarDuration.Short
+//                            )
+//                        }
+//                    }
+
+
                 },
 
                 modifier = Modifier
@@ -265,10 +304,11 @@ fun RegisterUserScreen(
                 )
             }
 
+//            SnackbarHost(hostState = snackbarHostState)
             TextButton(
                 onClick = onBackButtonClicked,
                 modifier = Modifier
-                    .offset(x = 69.dp)
+                    .padding(69.dp, 0.dp, 0.dp, 0.dp)
                     .background(Pink80)
             ) {
                 Text(
@@ -278,6 +318,7 @@ fun RegisterUserScreen(
                 )
             }
         }
+
     }
 
 }

@@ -8,7 +8,6 @@ import androidx.activity.enableEdgeToEdge
 
 import com.it2161.dit99999x.assignment1.ui.theme.Assignment1Theme
 
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

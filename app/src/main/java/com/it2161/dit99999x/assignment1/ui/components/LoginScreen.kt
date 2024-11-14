@@ -2,7 +2,6 @@ package com.it2161.dit99999x.assignment1.ui.components
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -12,9 +11,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -29,17 +29,15 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.it2161.dit99999x.assignment1.MovieRaterApplication
 import com.it2161.dit99999x.assignment1.R
-import com.it2161.dit99999x.assignment1.data.UserProfile
 import com.it2161.dit99999x.assignment1.ui.theme.*
-
 
 @Composable
 fun LoginScreen(
     onLoginButtonClicked: () -> Unit,
     onRegisterButtonClicked: () -> Unit,
-    userProfile: UserProfile,
-    modifier: Modifier = Modifier
+    modifier: Modifier
 ) {
 
     var password by remember { mutableStateOf("") }
@@ -56,7 +54,7 @@ fun LoginScreen(
     Column (
         modifier = Modifier
             .fillMaxWidth()
-            .offset(x = 35.dp, y=400.dp)
+            .padding(35.dp, 400.dp, 0.dp, 0.dp)
     ) {
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -73,42 +71,40 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        Row {
+            TextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Enter Password") },
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                modifier = Modifier
+                    .width(225.dp)
 
-        Spacer(modifier = Modifier.height(16.dp))
-        TextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Enter Password") },
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            modifier = Modifier
-                .width(225.dp)
-
-        )
-
-        Column (
-            modifier = Modifier
-                .offset(x = 255.dp, y = -(52.5).dp),
-            horizontalAlignment = Alignment.End
-        ) {
-            TextButton(
-                onClick = { passwordVisible = !passwordVisible }
+            )
+            Column (
+                modifier = Modifier
+                    .padding(10.dp, 4.dp, 0.dp, 0.dp),
+                horizontalAlignment = Alignment.End
             ) {
-                Text(if (passwordVisible) "Hide" else "Show")
+                TextButton(
+                    onClick = { passwordVisible = !passwordVisible }
+                ) {
+                    Text(if (passwordVisible) "Hide" else "Show")
+                }
+            }
+
+            if (showError) {
+
             }
         }
 
-        if (showError) {
-            Text(
-                text = "User ID or password is incorrect",
-                color = Color.Red
-            )
-        }
+        Spacer(modifier = Modifier.height(32.dp))
 
         Row {
             TextButton(
                 onClick = {
-                    if (userProfile.userName == userID && userProfile.password == password)  {
+                    if (MovieRaterApplication().userProfile?.userName.toString() == userID && MovieRaterApplication().userProfile?.password == password)  {
                         showError = false
                         onLoginButtonClicked()
                     }
@@ -131,7 +127,7 @@ fun LoginScreen(
             TextButton(
                 onClick = onRegisterButtonClicked,
                 modifier = Modifier
-                    .offset(x = 69.dp)
+                    .padding(69.dp, 0.dp, 0.dp, 0.dp)
                     .background(Pink80)
             ) {
                 Text(
@@ -139,6 +135,10 @@ fun LoginScreen(
                     fontSize = 17.sp,
                     color = Color.White
                 )
+            }
+
+            if (showError) {
+                Text(text="Incorrect user or password", color=Color.Red)
             }
         }
     }

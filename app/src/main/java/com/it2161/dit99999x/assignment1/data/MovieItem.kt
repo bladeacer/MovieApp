@@ -16,7 +16,9 @@ data class MovieItem(
 
 data class Comments(
     val user: String,
-    val comment: String
+    val comment: String,
+    val date: String,
+    val time: String
 )
 
 

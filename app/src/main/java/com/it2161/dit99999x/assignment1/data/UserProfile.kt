@@ -1,11 +1,11 @@
 package com.it2161.dit99999x.assignment1.data
 
 data class UserProfile(
-    val userName: String,
-    val password: String,
-    val email: String,
-    val gender: String,
-    val mobile: String,
-    val updates: Boolean,
-    val yob: String
+    var userName: String,
+    var password: String,
+    var email: String,
+    var gender: String,
+    var mobile: String,
+    var updates: Boolean,
+    var yob: String
 )
