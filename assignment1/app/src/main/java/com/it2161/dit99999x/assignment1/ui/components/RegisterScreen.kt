@@ -1,9 +1,9 @@
 package com.it2161.dit99999x.assignment1.ui.components
 
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -33,15 +33,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.TextField
 import androidx.compose.material3.RadioButton
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import com.it2161.dit99999x.assignment1.MovieRaterApplication
-import kotlinx.coroutines.launch
 
 @Composable
 fun CustomDropdownMenu(
@@ -114,8 +112,9 @@ fun RegisterUserScreen(
     var showToast by remember { mutableStateOf(false) }
     var toastMessage by remember { mutableStateOf("") }
 
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
+    var passwordVisible by remember { mutableStateOf(false) }
+    var confirmPasswordVisible by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     //    Check whether required fields are filled up by seeing if they
     //    are the same as the nonsensical default values, if they are display the toast and refuse
@@ -134,7 +133,7 @@ fun RegisterUserScreen(
         TextField (
             value = userName,
             onValueChange = {userName = it},
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+            keyboardOptions = KeyboardOptions(showKeyboardOnFocus = true),
             modifier = Modifier
                 .width(225.dp)
 
@@ -144,25 +143,53 @@ fun RegisterUserScreen(
         Text(
             text = "Password"
         )
-        TextField (
-            value = password,
-            onValueChange = {password = it},
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            modifier = Modifier
-                .width(225.dp)
-        )
+        Row {
+            TextField(
+                value = password,
+                onValueChange = { password = it },
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                modifier = Modifier
+                    .width(225.dp)
+            )
+            Column(
+                modifier = Modifier
+                    .padding(10.dp, 4.dp, 0.dp, 0.dp),
+                horizontalAlignment = Alignment.End
+            ) {
+                TextButton(
+                    onClick = { passwordVisible = !passwordVisible }
+                ) {
+                    Text(if (passwordVisible) "Hide" else "Show")
+                }
+            }
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = "Confirm Password"
         )
-        TextField (
-            value = confirmPassword,
-            onValueChange = {confirmPassword = it},
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            modifier = Modifier
-                .width(225.dp)
-        )
+        Row {
+            TextField (
+                value = confirmPassword,
+                onValueChange = {confirmPassword = it},
+                visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                modifier = Modifier
+                    .width(225.dp)
+            )
+            Column(
+                modifier = Modifier
+                    .padding(10.dp, 4.dp, 0.dp, 0.dp),
+                horizontalAlignment = Alignment.End
+            ) {
+                TextButton(
+                    onClick = { confirmPasswordVisible = !confirmPasswordVisible }
+                ) {
+                    Text(if (confirmPasswordVisible) "Hide" else "Show")
+                }
+            }
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
         Text(
@@ -171,9 +198,10 @@ fun RegisterUserScreen(
         TextField (
             value = email,
             onValueChange = {email = it},
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email,
+                showKeyboardOnFocus = true),
             modifier = Modifier
-                .width(225.dp)
+                .width(270.dp)
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -224,6 +252,18 @@ fun RegisterUserScreen(
             )
         }
 
+
+        Text(
+            text = "Enter mobile number:"
+        )
+        TextField (
+            value = mobileNumber,
+            onValueChange = {mobileNumber = it},
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+            modifier = Modifier
+                .width(270.dp)
+        )
+
         Spacer(modifier = Modifier.height(8.dp))
         Row{
             Text (
@@ -242,8 +282,6 @@ fun RegisterUserScreen(
                 modifier = Modifier
             )
         }
-
-        // TODO: Mobile number field
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -284,18 +322,9 @@ fun RegisterUserScreen(
                         showToast = false
                         MovieRaterApplication.instance.userProfile = UserProfile(userName,
                             password, email, gender, mobileNumber, updateVal, yearOfBirth)
+                        Log.d("User profile : ", ""+MovieRaterApplication.instance.userProfile?.userName)
                         onRegisterButtonClicked()
                     }
-
-                    if (showToast) {
-                        scope.launch {
-                            snackbarHostState.showSnackbar(
-                                message = toastMessage,
-                                duration = SnackbarDuration.Short
-                            )
-                        }
-                    }
-
 
                 },
 
@@ -309,7 +338,6 @@ fun RegisterUserScreen(
                 )
             }
 
-            SnackbarHost(hostState = snackbarHostState)
             TextButton(
                 onClick = onBackButtonClicked,
                 modifier = Modifier
@@ -322,6 +350,9 @@ fun RegisterUserScreen(
                     color = Color.White
                 )
             }
+            if (showToast) {
+                Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show()
+            }
         }
 
     }
@@ -329,13 +360,14 @@ fun RegisterUserScreen(
 
 }
 
-@Preview
-@Composable
-fun RegisterUserScreenPreview() {
-    RegisterUserScreen(
-        onBackButtonClicked = {},
-        onRegisterButtonClicked = {},
-        modifier = Modifier
-    )
-
-}
+//@Preview
+//@Composable
+//fun RegisterUserScreenPreview() {
+//    RegisterUserScreen(
+//        onBackButtonClicked = {},
+//        onRegisterButtonClicked = {},
+//        movieClass = MovieRaterApplication,
+//        modifier = Modifier
+//    )
+//
+//}
