@@ -1,9 +1,7 @@
 package com.it2161.dit99999x.assignment1.ui.components
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.Image
@@ -19,7 +17,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.it2161.dit99999x.assignment1.MovieRaterApplication
 import com.it2161.dit99999x.assignment1.R
-import com.it2161.dit99999x.assignment1.data.UserProfile
 import com.it2161.dit99999x.assignment1.ui.theme.*
 
 

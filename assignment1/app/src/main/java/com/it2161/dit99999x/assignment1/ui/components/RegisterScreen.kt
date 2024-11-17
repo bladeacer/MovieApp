@@ -3,7 +3,6 @@ package com.it2161.dit99999x.assignment1.ui.components
 
 import android.util.Log
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -345,7 +344,7 @@ fun RegisterUserScreen(
                     .background(Pink80)
             ) {
                 Text(
-                    text = "Back to login",
+                    text = "Cancel",
                     fontSize = 17.sp,
                     color = Color.White
                 )
