@@ -1,7 +1,6 @@
 package com.it2161.dit99999x.assignment1
 
 import android.util.Log
-import android.view.MenuItem
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -19,14 +18,13 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import androidx.navigation.NavHost
 import com.it2161.dit99999x.assignment1.ui.components.LoginScreen
 import com.it2161.dit99999x.assignment1.ui.components.RegisterUserScreen
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -35,6 +33,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.it2161.dit99999x.assignment1.data.UserProfile
 import com.it2161.dit99999x.assignment1.ui.components.LandingScreen
+import com.it2161.dit99999x.assignment1.ui.components.MovieDetailScreen
 import com.it2161.dit99999x.assignment1.ui.components.ProfileScreen
 
 enum class MovieScreen(@StringRes val title: Int) {
@@ -46,8 +45,6 @@ enum class MovieScreen(@StringRes val title: Int) {
     Register(R.string.register_user),
 }
 
-// TODO: Remove this default Top Bar, it is only used when debugging
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MovieViewerApp() {
@@ -56,6 +53,7 @@ fun MovieViewerApp() {
     val currentScreen = MovieScreen.valueOf(
         backStackEntry?.destination?.route ?: MovieScreen.Login.name
     )
+    val (sharedIndex, setSharedIndex) = remember { mutableIntStateOf(0) }
 
     Scaffold(
         topBar = {
@@ -140,7 +138,6 @@ fun MovieViewerApp() {
                             navController.navigate(MovieScreen.Register.name)
                         },
                         modifier = Modifier.fillMaxSize()
-
                     )
                 }
                 composable(route = MovieScreen.Register.name) {
@@ -156,15 +153,36 @@ fun MovieViewerApp() {
                 }
                 composable(route = MovieScreen.Landing.name) {
                     LandingScreen(
+                        sharedIndex = sharedIndex,
+                        setSharedIndex = setSharedIndex,
+                        onClickMovieItem = {
+                            navController.navigate(MovieScreen.Detail.name)
+                        },
                         modifier = Modifier.fillMaxSize()
                     )
                 }
                 composable(route = MovieScreen.Profile.name) {
                     ProfileScreen()
                 }
+                composable(
+                    route = MovieScreen.Detail.name
+                ){ backStackEntry ->
+                    MovieDetailScreen(
+                        sharedIndex = sharedIndex
+                    )
+                }
             }
         }
     }
-
-
 }
+
+//composable(
+//route = MovieScreen.Detail.name + "/{movieId}" // Ensure argument name matches
+//) { backStackEntry ->
+//    val movieId = backStackEntry.arguments?.getInt("movieId")
+//        ?: throw IllegalArgumentException("Missing movieId argument") // Handle missing argument
+//
+//    MovieDetailScreen(
+//        movieId = movieId
+//    )
+//}
