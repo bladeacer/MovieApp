@@ -7,6 +7,8 @@ import androidx.compose.material3.Scaffold
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenu
@@ -18,7 +20,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -31,7 +32,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.it2161.dit99999x.assignment1.data.Comments
+import com.it2161.dit99999x.assignment1.data.MovieItem
 import com.it2161.dit99999x.assignment1.data.UserProfile
+import com.it2161.dit99999x.assignment1.ui.components.CommentMovieScreen
 import com.it2161.dit99999x.assignment1.ui.components.LandingScreen
 import com.it2161.dit99999x.assignment1.ui.components.MovieDetailScreen
 import com.it2161.dit99999x.assignment1.ui.components.ProfileScreen
@@ -53,20 +57,39 @@ fun MovieViewerApp() {
     val currentScreen = MovieScreen.valueOf(
         backStackEntry?.destination?.route ?: MovieScreen.Login.name
     )
-    val (sharedIndex, setSharedIndex) = remember { mutableIntStateOf(0) }
+    val (sharedMovieItem, setSharedMovieItem) = remember { mutableStateOf(
+        MovieItem("", "", "", 0.0f, listOf(""), "", "", 0, "", listOf(Comments("", "", "", "")))) }
 
     Scaffold(
         topBar = {
             // TODO: Add for other screens stuff that needs custom app bars :)
             var (expanded, setExpanded) = remember { mutableStateOf(false) }
             val currentScreenTitle = currentScreen.title
-            if (currentScreenTitle != MovieScreen.Login.title && currentScreenTitle != MovieScreen.Register.title) {
+            if (currentScreenTitle != MovieScreen.Login.title &&
+                currentScreenTitle != MovieScreen.Register.title) {
                 CenterAlignedTopAppBar(
                     title = {
-                        Text (
-                            text = stringResource(currentScreenTitle),
-                            style = TextStyle(fontSize = 18.sp)
-                        )
+                        if (currentScreenTitle != MovieScreen.Detail.title) {
+                            Text (
+                                text = stringResource(currentScreenTitle),
+                                style = TextStyle(fontSize = 18.sp)
+                            )
+                        } else {
+                            Text (
+                                text = sharedMovieItem.title,
+                                style = TextStyle(fontSize = 18.sp)
+                            )
+                        }
+                    },
+                    navigationIcon = {
+                        if (currentScreenTitle == MovieScreen.Detail.title) {
+                            IconButton(onClick = { navController.navigate(MovieScreen.Landing.name)}) {
+                                Icon(
+                                    Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Back"
+                                )
+                            }
+                        }
                     },
                     actions = {
                         if (currentScreenTitle == MovieScreen.Landing.title) {
@@ -96,18 +119,37 @@ fun MovieViewerApp() {
                                 }
                             }
                         }
+                        if (currentScreenTitle == MovieScreen.Detail.title) {
+                            IconButton(onClick = { setExpanded(true)}) {
+                                Icon(
+                                    Icons.Filled.MoreVert,
+                                    contentDescription = "More"
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { setExpanded(false)}
+                            ) {
+                                TextButton(
+                                    onClick = {
+                                        navController.navigate(MovieScreen.Comment.name)
+                                    }
+                                ) {
+                                    Text("View Comment")
+                                }
+                            }
+                        }
                     }
                 )
             }
-//            NavHost(navController = navController, startDestination = MovieScreen.Login.name) {
-//                composable (route = MovieScreen.Landing.name) {
-//                    CenterAlignedTopAppBar(
-//                    )
-//                }
-//            }
         },
 
         modifier = Modifier.fillMaxSize()
+//                navigationIcon = {
+//            IconButton(onClick = { navController.navigateUp() }) {
+//                Icon(
+//                    imageVector = Icons.Default.ArrowBack,
+//                    contentDescription 1
 
     ) { innerPadding ->
 
@@ -153,8 +195,8 @@ fun MovieViewerApp() {
                 }
                 composable(route = MovieScreen.Landing.name) {
                     LandingScreen(
-                        sharedIndex = sharedIndex,
-                        setSharedIndex = setSharedIndex,
+                        sharedMovieItem = sharedMovieItem,
+                        setMovieItem = setSharedMovieItem,
                         onClickMovieItem = {
                             navController.navigate(MovieScreen.Detail.name)
                         },
@@ -168,8 +210,11 @@ fun MovieViewerApp() {
                     route = MovieScreen.Detail.name
                 ){ backStackEntry ->
                     MovieDetailScreen(
-                        sharedIndex = sharedIndex
+                        sharedMovieItem = sharedMovieItem
                     )
+                }
+                composable(route = MovieScreen.Comment.name) {
+                    CommentMovieScreen()
                 }
             }
         }

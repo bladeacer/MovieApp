@@ -22,12 +22,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.it2161.dit99999x.assignment1.data.MovieItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LandingScreen(
-    sharedIndex: Int,
-    setSharedIndex: (Int) -> Unit,
+    sharedMovieItem: MovieItem,
+    setMovieItem: (MovieItem) -> Unit,
     onClickMovieItem: () -> Unit,
     modifier: Modifier
 ) {
@@ -52,7 +53,7 @@ fun LandingScreen(
                         .padding(10.dp, 0.dp)
                         .fillMaxSize()
                         .clickable {
-                            setSharedIndex(index)
+                            setMovieItem(movieItem)
                             onClickMovieItem()
                         }
                 ){
