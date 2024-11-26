@@ -27,7 +27,6 @@ import com.it2161.dit99999x.assignment1.data.MovieItem
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LandingScreen(
-    sharedMovieItem: MovieItem,
     setMovieItem: (MovieItem) -> Unit,
     onClickMovieItem: () -> Unit,
     modifier: Modifier
@@ -61,8 +60,7 @@ fun LandingScreen(
                     Image(
                         bitmap = imageBitmap, contentDescription = null,
                         modifier = Modifier
-                            .height(150.dp)
-                        ,
+                            .height(150.dp),
                         contentScale = ContentScale.Fit
                     )
                     Column (

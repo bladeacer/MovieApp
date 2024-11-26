@@ -62,6 +62,8 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.com.google.code.gson)
     implementation(libs.androidx.lifecycle.process)
+    implementation(libs.joda.convert)
+    implementation(libs.joda.time)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

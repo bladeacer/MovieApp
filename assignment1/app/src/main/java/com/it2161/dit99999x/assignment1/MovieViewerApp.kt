@@ -39,6 +39,7 @@ import com.it2161.dit99999x.assignment1.ui.components.CommentMovieScreen
 import com.it2161.dit99999x.assignment1.ui.components.LandingScreen
 import com.it2161.dit99999x.assignment1.ui.components.MovieDetailScreen
 import com.it2161.dit99999x.assignment1.ui.components.ProfileScreen
+import org.w3c.dom.Comment
 
 enum class MovieScreen(@StringRes val title: Int) {
     Login(R.string.login),
@@ -59,6 +60,7 @@ fun MovieViewerApp() {
     )
     val (sharedMovieItem, setSharedMovieItem) = remember { mutableStateOf(
         MovieItem("", "", "", 0.0f, listOf(""), "", "", 0, "", listOf(Comments("", "", "", "")))) }
+    val (sharedCommentItem, setSharedCommentItem) = remember { mutableStateOf( Comments("", "", "", "") ) }
 
     Scaffold(
         topBar = {
@@ -84,6 +86,14 @@ fun MovieViewerApp() {
                     navigationIcon = {
                         if (currentScreenTitle == MovieScreen.Detail.title) {
                             IconButton(onClick = { navController.navigate(MovieScreen.Landing.name)}) {
+                                Icon(
+                                    Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Back"
+                                )
+                            }
+                        }
+                        else if (currentScreenTitle == MovieScreen.Comment.title) {
+                            IconButton(onClick = { navController.navigate(MovieScreen.Detail.name)}) {
                                 Icon(
                                     Icons.AutoMirrored.Filled.ArrowBack,
                                     contentDescription = "Back"
@@ -132,10 +142,10 @@ fun MovieViewerApp() {
                             ) {
                                 TextButton(
                                     onClick = {
-                                        navController.navigate(MovieScreen.Comment.name)
+//                                        navController.navigate(MovieScreen.Comment.name)
                                     }
                                 ) {
-                                    Text("View Comment")
+                                    Text("Add Comments")
                                 }
                             }
                         }
@@ -145,11 +155,6 @@ fun MovieViewerApp() {
         },
 
         modifier = Modifier.fillMaxSize()
-//                navigationIcon = {
-//            IconButton(onClick = { navController.navigateUp() }) {
-//                Icon(
-//                    imageVector = Icons.Default.ArrowBack,
-//                    contentDescription 1
 
     ) { innerPadding ->
 
@@ -195,7 +200,6 @@ fun MovieViewerApp() {
                 }
                 composable(route = MovieScreen.Landing.name) {
                     LandingScreen(
-                        sharedMovieItem = sharedMovieItem,
                         setMovieItem = setSharedMovieItem,
                         onClickMovieItem = {
                             navController.navigate(MovieScreen.Detail.name)
@@ -210,11 +214,17 @@ fun MovieViewerApp() {
                     route = MovieScreen.Detail.name
                 ){ backStackEntry ->
                     MovieDetailScreen(
-                        sharedMovieItem = sharedMovieItem
+                        sharedMovieItem = sharedMovieItem,
+                        setSharedCommentItem = setSharedCommentItem,
+                        onClickCommentItem = {
+                            navController.navigate(MovieScreen.Comment.name)
+                        }
                     )
                 }
                 composable(route = MovieScreen.Comment.name) {
-                    CommentMovieScreen()
+                    CommentMovieScreen(
+                        sharedCommentItem = sharedCommentItem
+                    )
                 }
             }
         }
