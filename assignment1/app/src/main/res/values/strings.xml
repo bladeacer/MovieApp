@@ -5,6 +5,8 @@
     <string name="landing">Landing page</string>
     <string name="comment_movie">Comment movie</string>
     <string name="movie_detail">Movie Details</string>
-    <string name="profile_screen">Profile Screen</string>
+    <string name="profile_screen">Profile</string>
+    <string name="edit_profile">Edit Profile</string>
     <string name="register_user">Register</string>
+    <string name="add_comment">Add Comment</string>
 </resources>
