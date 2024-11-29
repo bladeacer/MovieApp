@@ -50,9 +50,7 @@ fun EditProfile(
     setYearOfBirth: (String) -> Unit,
     options: List<String>,
     showToast: Boolean,
-    setShowToast: (Boolean) -> Unit,
     toastMessage: String,
-    setToastMessage: (String) -> Unit,
     mobileNumber: String,
     setMobileNumber: (String) -> Unit
 ){
@@ -255,7 +253,7 @@ fun EditProfile(
                 contentDescription = "Avatar 1",
                 modifier = Modifier
                     .padding(0.dp, 12.dp, 0.dp, 0.dp)
-                    .size(32.dp)
+                    .size(64.dp)
             )
             RadioButton(
                 selected = sharedAvatarInt == 1,
@@ -266,7 +264,7 @@ fun EditProfile(
                 contentDescription = "Avatar 2",
                 modifier = Modifier
                     .padding(0.dp, 12.dp, 0.dp, 0.dp)
-                    .size(32.dp)
+                    .size(64.dp)
             )
             RadioButton(
                 selected = sharedAvatarInt == 2,
@@ -277,7 +275,7 @@ fun EditProfile(
                 contentDescription = "Avatar 3",
                 modifier = Modifier
                     .padding(0.dp, 12.dp, 0.dp, 0.dp)
-                    .size(32.dp)
+                    .size(64.dp)
             )
             RadioButton(
                 selected = sharedAvatarInt == 3,

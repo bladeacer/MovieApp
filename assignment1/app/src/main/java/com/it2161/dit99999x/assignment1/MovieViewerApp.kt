@@ -79,6 +79,7 @@ fun MovieViewerApp() {
     var (editProfileToastMessage, editProfileSetToastMessage) = remember { mutableStateOf("") }
     var (editProfilePasswordVisible, editProfileSetPasswordVisible) = remember { mutableStateOf(false) }
     var (editProfileConfirmPasswordVisible, editProfileSetConfirmPasswordVisible) = remember { mutableStateOf(false) }
+    var (movieIndex, setMovieIndex) = remember { mutableIntStateOf(0) }
 
     Scaffold(
         topBar = {
@@ -290,6 +291,7 @@ fun MovieViewerApp() {
                         onClickMovieItem = {
                             navController.navigate(MovieScreen.Detail.name)
                         },
+                        setIndex = setMovieIndex,
                         modifier = Modifier.fillMaxSize()
                     )
                 }
@@ -322,9 +324,7 @@ fun MovieViewerApp() {
                         setYearOfBirth = editProfileSetYearOfBirth,
                         options = editProfileOptions,
                         showToast = editProfileShowToast,
-                        setShowToast = editProfileSetShowToast,
                         toastMessage = editProfileToastMessage,
-                        setToastMessage = editProfileSetToastMessage,
                         mobileNumber = editProfileMobileNumber,
                         setMobileNumber = editProfileSetMobileNumber
 
@@ -332,7 +332,7 @@ fun MovieViewerApp() {
                 }
                 composable(
                     route = MovieScreen.Detail.name
-                ){ backStackEntry ->
+                ){
                     MovieDetailScreen(
                         sharedMovieItem = sharedMovieItem,
                         setSharedCommentItem = setSharedCommentItem,
@@ -347,7 +347,12 @@ fun MovieViewerApp() {
                     )
                 }
                 composable(route = MovieScreen.AddComment.name) {
-                    AddCommentScreen( )
+                    AddCommentScreen(
+                        sharedMovieIndex = movieIndex,
+                        onClickSubmitComment = {
+                            navController.navigate(MovieScreen.Detail.name)
+                        }
+                    )
                 }
             }
         }

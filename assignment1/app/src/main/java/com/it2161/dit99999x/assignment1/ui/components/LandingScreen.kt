@@ -29,6 +29,7 @@ import com.it2161.dit99999x.assignment1.data.MovieItem
 fun LandingScreen(
     setMovieItem: (MovieItem) -> Unit,
     onClickMovieItem: () -> Unit,
+    setIndex: (Int) -> Unit,
     modifier: Modifier
 ) {
     val context = LocalContext.current
@@ -52,6 +53,7 @@ fun LandingScreen(
                         .padding(10.dp, 0.dp)
                         .fillMaxSize()
                         .clickable {
+                            setIndex(index)
                             setMovieItem(movieItem)
                             onClickMovieItem()
                         }

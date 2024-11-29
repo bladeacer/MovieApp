@@ -91,7 +91,7 @@ fun MovieDetailScreen(
             Text(text = synopsisString, fontSize = 12.sp, modifier = Modifier.fillMaxWidth(0.9f))
             Spacer(modifier = Modifier.height(16.dp))
             Text("Comments: ", fontSize= 12.sp)
-            val commentsList = sharedMovieItem.comment.sortedByDescending { it.time }
+            var commentsList = sharedMovieItem.comment.sortedByDescending { it.date }
             LazyColumn {
                 items(
                     count = commentsList.size,
