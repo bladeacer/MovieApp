@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">assignment2</string>
+    <string name="login">Login</string>
+    <string name="landing">Landing</string>
+    <string name="register">Register</string>
+    <string name="profile">View Profile</string>
+    <string name="detail">Detail</string>
 </resources>
