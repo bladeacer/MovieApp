@@ -37,7 +37,8 @@ fun MainScreen(viewModel: MyViewModel) {
         },
         modifier = Modifier.fillMaxSize()
     ) { innerPadding ->
-        NavHost(navController = navController, startDestination = SwitchScreen.Landing.name) {
+        // TODO: Replace with login route once testing is done
+        NavHost(navController = navController, startDestination = SwitchScreen.Login.name) {
             composable(SwitchScreen.Login.name) {
                 LoginScreen()
             }

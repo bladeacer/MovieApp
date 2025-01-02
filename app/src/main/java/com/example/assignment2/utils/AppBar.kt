@@ -9,7 +9,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 data class AppBarState(
     val title: String = "",
@@ -26,9 +28,12 @@ fun BaseAppBar(appbarState: AppBarState) {
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             titleContentColor = MaterialTheme.colorScheme.primary,
         ),
-        title = { Text(appbarState.title) },
+        title = { Text(
+            text = appbarState.title,
+            style = TextStyle(fontSize = 18.sp)
+        ) },
         actions = appbarState.actions,
         modifier = appbarState.modifier,
-        navigationIcon = appbarState.navigationIcon
+        navigationIcon = appbarState.navigationIcon,
     )
 }

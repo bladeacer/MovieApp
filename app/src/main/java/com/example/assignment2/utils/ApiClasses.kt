@@ -13,7 +13,12 @@ enum class RequestUrl(val url: String) {
 
 data class SearchCriteria(
     val query: String,
-    val pageNumber: Int
+    val pageNumber: Int = 1
+)
+
+data class IdSearchCriteria(
+    val id: Int,
+    val pageNumber: Int = 1
 )
 
 data class MovieResponse(
