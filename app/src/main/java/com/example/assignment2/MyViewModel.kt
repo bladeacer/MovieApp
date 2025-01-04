@@ -2,17 +2,21 @@ package com.example.assignment2
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
+import com.example.assignment2.data.MyRepositoryImpl
+import com.example.assignment2.data.User
+import com.example.assignment2.data.UserDao
 import com.example.assignment2.utils.IdSearchCriteria
-import com.example.assignment2.utils.InventoryApplication
 import com.example.assignment2.utils.Movie
 import com.example.assignment2.utils.MovieDetail
 import com.example.assignment2.utils.MovieResponse
 import com.example.assignment2.utils.RequestUrl
 import com.example.assignment2.utils.Review
 import com.example.assignment2.utils.SearchCriteria
-import com.example.assignment2.utils.User
-import com.example.assignment2.utils.UsersRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,7 +34,9 @@ suspend fun delayRandomMillis(minMillis: Long = 0, maxMillis: Long = 1000) {
     delay(randomDelay)
 }
 
-class MyViewModel( private val repository: UsersRepository) : ViewModel() {
+class MyViewModel (
+    private val repository: MyRepositoryImpl
+) : ViewModel() {
     private val _toggleCriteria = MutableStateFlow(SearchCriteria(RequestUrl.POPULAR.url, 1))
     val searchCriteria: StateFlow<SearchCriteria> = _toggleCriteria.asStateFlow()
 
@@ -215,7 +221,9 @@ class MyViewModel( private val repository: UsersRepository) : ViewModel() {
         _toggleCriteria.value = _toggleCriteria.value.copy(query = newUrl)
     }
     fun updatePageNumber(newPageNumber: String) {
-        val totalPages = _movieResponse.value?.totalPages?.minus(5000) ?: 1
+        val totalPages = _movieResponse.value?.totalPages?.let{
+            (it * 0.9).toInt()
+        } ?: 1
         val newPN = newPageNumber.filter { it.isDigit()}
         if (newPN.isEmpty() || newPN.toInt() < 1 || newPN.toInt() > totalPages) {
             _toggleCriteria.value = _toggleCriteria.value.copy(pageNumber = 1)
@@ -239,6 +247,15 @@ class MyViewModel( private val repository: UsersRepository) : ViewModel() {
     }
     fun updateReviewCriteria(newReviewCriteria: IdSearchCriteria) {
         _reviewCriteria.value = newReviewCriteria
+    }
+
+    companion object {
+        val factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                val application = (this[APPLICATION_KEY] as MovieApplication)
+                MyViewModel(application.database.MyRepositoryImpl())
+            }
+        }
     }
 
 }

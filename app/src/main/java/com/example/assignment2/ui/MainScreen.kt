@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -22,7 +23,7 @@ import com.example.assignment2.utils.BaseAppBar
 import com.example.assignment2.utils.SwitchScreen
 
 @Composable
-fun MainScreen(viewModel: MyViewModel) {
+fun MainScreen(viewModel: MyViewModel = viewModel(factory = MyViewModel.factory)) {
     val navController = rememberNavController()
     val backStackEntryState = navController.currentBackStackEntryAsState()
     val backStackEntry  = backStackEntryState.value
@@ -38,7 +39,7 @@ fun MainScreen(viewModel: MyViewModel) {
         modifier = Modifier.fillMaxSize()
     ) { innerPadding ->
         // TODO: Replace with login route once testing is done
-        NavHost(navController = navController, startDestination = SwitchScreen.Login.name) {
+        NavHost(navController = navController, startDestination = SwitchScreen.Landing.name) {
             composable(SwitchScreen.Login.name) {
                 LoginScreen()
             }
