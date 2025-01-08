@@ -41,19 +41,27 @@ fun MainScreen(viewModel: MyViewModel = viewModel(factory = MyViewModel.factory)
         // TODO: Replace with login route once testing is done
         NavHost(navController = navController, startDestination = SwitchScreen.Landing.name) {
             composable(SwitchScreen.Login.name) {
-                LoginScreen()
+                LoginScreen(
+                    viewModel,
+                    {
+                        navController.navigate(SwitchScreen.Landing.name)
+                    },
+                    {
+                        navController.navigate(SwitchScreen.Register.name)
+                    }
+                )
             }
             composable(SwitchScreen.Landing.name) {
                 LandingScreen(viewModel, innerPadding)
             }
             composable(SwitchScreen.Register.name) {
-                RegisterScreen()
+                RegisterScreen(viewModel)
             }
             composable(SwitchScreen.ViewProfile.name) {
-                ProfileScreen()
+                ProfileScreen(viewModel)
             }
             composable(SwitchScreen.Detail.name) {
-                DetailScreen()
+                DetailScreen(viewModel)
             }
         }
     }

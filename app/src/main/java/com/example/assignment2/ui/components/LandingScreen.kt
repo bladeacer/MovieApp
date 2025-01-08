@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.ButtonDefaults
@@ -36,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.assignment2.MyViewModel
@@ -103,7 +105,11 @@ fun LandingScreen(viewModel: MyViewModel, contentPadding: PaddingValues) {
                 value = searchCriteria.value.pageNumber.toString(),
                 onValueChange = { newPageNumber ->
                     viewModel.updatePageNumber(newPageNumber)
-                }
+                },
+                keyboardOptions = KeyboardOptions(
+                    showKeyboardOnFocus = true,
+                    keyboardType = KeyboardType.Number),
+                modifier = Modifier.width(50.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(

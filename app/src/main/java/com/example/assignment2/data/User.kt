@@ -35,6 +35,9 @@ interface UserDao {
     @Query("SELECT * from users WHERE id = :id")
     fun getUser(id: Int): Flow<User>
 
+    @Query("SELECT * from users WHERE email = :email AND password = :password")
+    fun validateLogin(email: String, password: String): Flow<User?>
+
     // Specify the conflict strategy as IGNORE, when the user tries to add an
     // existing User into the database Room ignores the conflict.
     @Insert(onConflict = OnConflictStrategy.IGNORE)
@@ -57,6 +60,8 @@ interface UsersRepository {
      * Retrieve an user from the given data source that matches with the [id].
      */
     fun getUserStream(id: Int): Flow<User?>
+
+    fun validateLogin(email: String, password: String): Flow<User?>
 
     /**
      * Insert user in the data source
@@ -82,12 +87,16 @@ class MyRepositoryImpl (
         return myDao.getAllUsers()
     }
 
-    override suspend fun insertUser(user: User) {
-        myDao.insert(user)
-    }
-
     override fun getUserStream(id: Int): Flow<User?> {
         return myDao.getUser(id)
+    }
+
+    override fun validateLogin(email: String, password: String): Flow<User?> {
+        return myDao.validateLogin(email, password)
+    }
+
+    override suspend fun insertUser(user: User) {
+        myDao.insert(user)
     }
 
     override suspend fun updateUser(user: User) {

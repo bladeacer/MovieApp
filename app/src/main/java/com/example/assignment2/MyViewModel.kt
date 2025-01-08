@@ -29,11 +29,6 @@ import kotlinx.coroutines.withContext
 import kotlin.random.Random
 
 
-suspend fun delayRandomMillis(minMillis: Long = 0, maxMillis: Long = 1000) {
-    val randomDelay = Random.nextLong(minMillis, maxMillis + 1)
-    delay(randomDelay)
-}
-
 class MyViewModel (
     private val repository: MyRepositoryImpl
 ) : ViewModel() {
@@ -67,6 +62,9 @@ class MyViewModel (
     private val _user = MutableStateFlow<User>(User(0, "", "", ""))
     val user: StateFlow<User> = _user.asStateFlow()
 
+    private val _allowAction = MutableStateFlow<Boolean>(false)
+    val allowAction: StateFlow<Boolean> = _allowAction.asStateFlow()
+
     suspend fun addUser() {
         viewModelScope.launch {
             repository.insertUser(user.value)
@@ -79,7 +77,6 @@ class MyViewModel (
     fun fetchMovies() {
         viewModelScope.launch {
             CoroutineScope(Dispatchers.IO).launch {
-                delayRandomMillis()
                 val result = withContext(Dispatchers.IO) {
                     try {
                         MovieApi.retrofitService.getMovies(searchCriteria.value.query, page = searchCriteria.value.pageNumber)
@@ -97,7 +94,6 @@ class MyViewModel (
     fun fetchSimilar() {
         viewModelScope.launch{
             CoroutineScope(Dispatchers.IO).launch{
-                delayRandomMillis()
                 val result = withContext(Dispatchers.IO) {
                     try {
                         MovieApi.retrofitService.getSimilar(movieId.value)
@@ -115,7 +111,6 @@ class MyViewModel (
     fun fetchReviews() {
         viewModelScope.launch{
             CoroutineScope(Dispatchers.IO).launch {
-                delayRandomMillis()
                 val result = withContext(Dispatchers.IO) {
                     try {
                         MovieApi.retrofitService.getReviewsById(movieId.value)
@@ -133,7 +128,6 @@ class MyViewModel (
     fun fetchDetail() {
         viewModelScope.launch{
             CoroutineScope(Dispatchers.IO).launch {
-                delayRandomMillis()
                 val result = withContext(Dispatchers.IO) {
                     try {
                         MovieApi.retrofitService.getDetailById(movieId.value)
@@ -151,7 +145,6 @@ class MyViewModel (
     fun fetchReview () {
         viewModelScope.launch {
             CoroutineScope(Dispatchers.IO).launch {
-                delayRandomMillis()
                 val result = withContext(Dispatchers.IO) {
                     try {
                         MovieApi.retrofitService.getReviewsById(reviewCriteria.value.id,
@@ -172,7 +165,6 @@ class MyViewModel (
         // TODO: There is no way this works
         viewModelScope.launch {
             CoroutineScope(Dispatchers.IO).launch {
-                delayRandomMillis()
             }
             val result = withContext(Dispatchers.IO) {
                 try {
@@ -186,7 +178,6 @@ class MyViewModel (
                 var processedMovieList: List<Movie> = listOf<Movie>()
                 result?.results?.forEach { searchEntry ->
                     val result2 = withContext(Dispatchers.IO) {
-                        delayRandomMillis(0, 500)
                         try {
                             MovieApi.retrofitService.getDetailById(searchEntry.id)
                         } catch (e: Exception) {
@@ -248,6 +239,21 @@ class MyViewModel (
     fun updateReviewCriteria(newReviewCriteria: IdSearchCriteria) {
         _reviewCriteria.value = newReviewCriteria
     }
+    fun validateLogin(email: String, password: String) {
+        viewModelScope.launch {
+            CoroutineScope(Dispatchers.IO).launch {
+            }
+            val result = withContext(Dispatchers.IO) {
+                try {
+                    repository.validateLogin(email, password)
+                } catch (e: Exception) {
+                    Log.d("Movie Response Exception: ", "Message: ${e.message.toString()}\nStack trace: ${e.printStackTrace()}")
+                    null
+                }
+            }
+            _allowAction.value = result != null
+        }
+    }
 
     companion object {
         val factory: ViewModelProvider.Factory = viewModelFactory {
@@ -257,6 +263,7 @@ class MyViewModel (
             }
         }
     }
+
 
 }
 
