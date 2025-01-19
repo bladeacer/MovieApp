@@ -7,10 +7,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
-import com.example.assignment2.data.MyRepositoryImpl
+import com.example.assignment2.data.UsersRepository
 import com.example.assignment2.data.User
-import com.example.assignment2.data.UserDao
-import com.example.assignment2.utils.IdSearchCriteria
 import com.example.assignment2.utils.Movie
 import com.example.assignment2.utils.MovieDetail
 import com.example.assignment2.utils.MovieResponse
@@ -23,14 +21,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
-
-import kotlin.random.Random
 
 
 class MyViewModel (
-    private val repository: MyRepositoryImpl
+    private val usersRepo: UsersRepository
 ) : ViewModel() {
     private val _toggleCriteria = MutableStateFlow(SearchCriteria(RequestUrl.POPULAR.url, 1))
     val searchCriteria: StateFlow<SearchCriteria> = _toggleCriteria.asStateFlow()
@@ -51,26 +47,44 @@ class MyViewModel (
     val search: StateFlow<SearchCriteria?> = _search.asStateFlow()
 
     private val _searchResult = MutableStateFlow<MovieResponse?>(null)
-    val keyword: StateFlow<MovieResponse?> = _searchResult.asStateFlow()
+    val searchResult: StateFlow<MovieResponse?> = _searchResult.asStateFlow()
 
-    private val _movieId = MutableStateFlow<Int>(1)
+    private val _movieId = MutableStateFlow<Int>(0)
     val movieId: StateFlow<Int> = _movieId.asStateFlow()
-
-    private val _reviewCriteria = MutableStateFlow<IdSearchCriteria>(IdSearchCriteria(1, 1))
-    val reviewCriteria: StateFlow<IdSearchCriteria> = _reviewCriteria.asStateFlow()
-
-    private val _user = MutableStateFlow<User>(User(0, "", "", ""))
-    val user: StateFlow<User> = _user.asStateFlow()
 
     private val _allowAction = MutableStateFlow<Boolean>(false)
     val allowAction: StateFlow<Boolean> = _allowAction.asStateFlow()
 
-    suspend fun addUser() {
+    private val _user = MutableStateFlow<User?>(null)
+    val user: StateFlow<User?> = _user.asStateFlow()
+
+    fun addUser(user: User) {
         viewModelScope.launch {
-            repository.insertUser(user.value)
+            try {
+                usersRepo.insertUser(user)
+            } catch (e: Exception) {
+                Log.d("User Response Exception", "Message: ${e.message.toString()}")
+            }
         }
     }
-
+    fun getUser(id: Int) : User? {
+        viewModelScope.launch{
+            CoroutineScope(Dispatchers.IO).launch {
+                val result = withContext(Dispatchers.IO) {
+                    try{
+                       usersRepo.getUserStream(id)
+                    } catch (e: Exception) {
+                        Log.d("User Response Exception: ", "Message: ${e.message.toString()}\nStack trace: ${e.printStackTrace()}")
+                        null
+                    }
+                }
+                withContext(Dispatchers.Main) {
+                    _user.value = result?.first()
+                }
+            }
+        }
+        return _user.value
+    }
 //    private val _uiState = MutableStateFlow<UiState<Any>>(UiState.Loading)
 //    val uiState: StateFlow<UiState<Any>> = _uiState.asStateFlow()
 
@@ -113,7 +127,7 @@ class MyViewModel (
             CoroutineScope(Dispatchers.IO).launch {
                 val result = withContext(Dispatchers.IO) {
                     try {
-                        MovieApi.retrofitService.getReviewsById(movieId.value)
+                        MovieApi.retrofitService.getReviewsById(_movieId.value)
                     } catch (e: Exception) {
                         Log.d("Movie Response Exception: ", "Message: ${e.message.toString()}\nStack trace: ${e.printStackTrace()}")
                         null
@@ -130,7 +144,8 @@ class MyViewModel (
             CoroutineScope(Dispatchers.IO).launch {
                 val result = withContext(Dispatchers.IO) {
                     try {
-                        MovieApi.retrofitService.getDetailById(movieId.value)
+                        Log.d("Movie Response", "Movie Id value: ${_movieId.value}")
+                        MovieApi.retrofitService.getDetailById(_movieId.value)
                     } catch (e: Exception) {
                         Log.d("Movie Response Exception: ", "Message: ${e.message.toString()}\nStack trace: ${e.printStackTrace()}")
                         null
@@ -142,25 +157,7 @@ class MyViewModel (
             }
         }
     }
-    fun fetchReview () {
-        viewModelScope.launch {
-            CoroutineScope(Dispatchers.IO).launch {
-                val result = withContext(Dispatchers.IO) {
-                    try {
-                        MovieApi.retrofitService.getReviewsById(reviewCriteria.value.id,
-                            page = reviewCriteria.value.pageNumber)
-                    } catch (e: Exception) {
-                        Log.d("Movie Response Exception: ", "Message: ${e.message.toString()}\nStack trace: ${e.printStackTrace()}")
-                        null
-                    }
-                }
-                withContext(Dispatchers.Main) {
-                    _review.value = result
-                }
-            }
 
-        }
-    }
     fun fetchSearch() {
         // TODO: There is no way this works
         viewModelScope.launch {
@@ -230,14 +227,8 @@ class MyViewModel (
     fun updateMovieId(newId: Int) {
         _movieId.value = newId
     }
-    fun updateUser(newUser: User) {
-        _user.value = newUser
-    }
     fun updateSearch(newSearch: SearchCriteria) {
         _search.value = newSearch
-    }
-    fun updateReviewCriteria(newReviewCriteria: IdSearchCriteria) {
-        _reviewCriteria.value = newReviewCriteria
     }
     fun validateLogin(email: String, password: String) {
         viewModelScope.launch {
@@ -245,13 +236,19 @@ class MyViewModel (
             }
             val result = withContext(Dispatchers.IO) {
                 try {
-                    repository.validateLogin(email, password)
+                    usersRepo.validateLogin(email, password)
+
                 } catch (e: Exception) {
                     Log.d("Movie Response Exception: ", "Message: ${e.message.toString()}\nStack trace: ${e.printStackTrace()}")
                     null
                 }
             }
+
             _allowAction.value = result != null
+            result?.collect { value ->
+                _user.value = value
+            }
+
         }
     }
 
@@ -259,7 +256,7 @@ class MyViewModel (
         val factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val application = (this[APPLICATION_KEY] as MovieApplication)
-                MyViewModel(application.database.MyRepositoryImpl())
+                MyViewModel(application.database.userRepoWrapper())
             }
         }
     }

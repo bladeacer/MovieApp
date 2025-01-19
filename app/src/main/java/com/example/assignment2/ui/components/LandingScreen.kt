@@ -1,5 +1,7 @@
 package com.example.assignment2.ui.components
 
+import android.util.Log
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -36,22 +38,31 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.assignment2.MyViewModel
 import com.example.assignment2.utils.Movie
+import com.example.assignment2.utils.NetworkCheck
 import com.example.assignment2.utils.RequestUrl
 import com.example.assignment2.utils.toTitleCase
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
-fun LandingScreen(viewModel: MyViewModel, contentPadding: PaddingValues) {
+fun LandingScreen(viewModel: MyViewModel, contentPadding: PaddingValues,
+                  onClickMovieItem: () -> Unit) {
     val movieResponse = viewModel.movieResponse.collectAsState()
     val searchCriteria = viewModel.searchCriteria.collectAsState()
     var expanded by remember { mutableStateOf(false) }
     var selectedIndex by remember { mutableIntStateOf(0) }
     val urls = RequestUrl.entries.toList()
+    // Use when loading etc
+    var networkCheck = NetworkCheck(LocalContext.current).isInternetAvailable()
 
     LaunchedEffect(
         key1 = searchCriteria.value
@@ -60,7 +71,7 @@ fun LandingScreen(viewModel: MyViewModel, contentPadding: PaddingValues) {
     }
 
     Column (
-        modifier = Modifier.padding( start = 16.dp, top = 115.dp, end = 16.dp, bottom = 16.dp)
+        modifier = Modifier.padding( start = 16.dp, top = 135.dp, end = 16.dp, bottom = 16.dp)
     ){
         Row {
             Box {
@@ -98,23 +109,23 @@ fun LandingScreen(viewModel: MyViewModel, contentPadding: PaddingValues) {
                     }
                 }
             }
-        }
-        Spacer(modifier = Modifier.width(16.dp))
-        Row {
-            TextField(
-                value = searchCriteria.value.pageNumber.toString(),
-                onValueChange = { newPageNumber ->
-                    viewModel.updatePageNumber(newPageNumber)
-                },
-                keyboardOptions = KeyboardOptions(
-                    showKeyboardOnFocus = true,
-                    keyboardType = KeyboardType.Number),
-                modifier = Modifier.width(50.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "out of ${movieResponse.value?.totalPages}"
-            )
+
+            Row {
+                TextField(
+                    value = searchCriteria.value.pageNumber.toString(),
+                    onValueChange = { newPageNumber ->
+                        viewModel.updatePageNumber(newPageNumber)
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        showKeyboardOnFocus = true,
+                        keyboardType = KeyboardType.Number),
+                    modifier = Modifier.width(50.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "out of ${movieResponse.value?.totalPages}"
+                )
+            }
         }
         Spacer(modifier = Modifier.height(16.dp))
         Row {
@@ -122,13 +133,14 @@ fun LandingScreen(viewModel: MyViewModel, contentPadding: PaddingValues) {
                 text = "Total results: ${movieResponse.value?.totalResults}"
             )
         }
+        Spacer(modifier = Modifier.height(16.dp))
         LazyColumn (
             modifier = Modifier.padding(horizontal = contentPadding.calculateBottomPadding(), vertical = 8.dp)
         ){
             items(
                 items = movieResponse.value?.results ?: listOf<Movie>(), key = { movie: Movie -> movie.id }, itemContent = {
                         movie ->
-                    LandingScreenMovieItem(movie)
+                    LandingScreenMovieItem(movie, viewModel, onClickMovieItem)
                 }
             )
         }
@@ -136,12 +148,24 @@ fun LandingScreen(viewModel: MyViewModel, contentPadding: PaddingValues) {
 
 }
 
+// TODO: Navigate and call search from here as well
+
 @Composable
-fun LandingScreenMovieItem(movie: Movie) {
+fun LandingScreenMovieItem(movie: Movie, viewModel: MyViewModel, onClickMovieItem: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(8.dp)
+            .clickable(
+                enabled = true,
+                onClick = {
+                    Log.d("Movie Response Sent Id", "${movie.id}")
+                    viewModel.updateMovieId(movie.id)
+                    if (viewModel.movieId.value != 0) {
+                        onClickMovieItem()
+                    }
+                }
+            ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(

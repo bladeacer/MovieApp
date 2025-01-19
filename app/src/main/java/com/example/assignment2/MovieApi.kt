@@ -1,6 +1,5 @@
 package com.example.assignment2
 
-import android.util.Log
 import com.example.assignment2.utils.MovieDetail
 import com.example.assignment2.utils.MovieResponse
 import com.example.assignment2.utils.RequestUrl
@@ -11,18 +10,8 @@ import retrofit2.Retrofit
 import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.Query
-import retrofit2.http.Url
-import com.google.gson.annotations.SerializedName
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Path
-
-//@Dao
-//interface MovieDao {
-//
-//}
-
-//@Entity(tableName = "MovieRes")
-//    @PrimaryKey
 
 private const val token = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2NGJhMzM1MWMwNTNiMzE0NmZjMGExZDRmMDY0MTUxMCIsIm5iZiI6MTczNDc3NTU3Mi45NDcsInN1YiI6IjY3NjY5MzE0OTE5Mjg3ZWY1MzkwZmExNSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.nqCZPNxecZbRimaChDwJpMMX4I-0F4UGbGy6bh1Uhic"
 private const val BASE_URL = "https://api.themoviedb.org/"

@@ -9,8 +9,8 @@ import androidx.room.RoomDatabase
 abstract class InventoryDatabase : RoomDatabase() {
 
     abstract fun userDao(): UserDao
-    fun MyRepositoryImpl() : MyRepositoryImpl {
-        return MyRepositoryImpl(userDao())
+    fun userRepoWrapper() : UsersRepository {
+        return UsersRepository(userDao())
     }
 
     companion object {

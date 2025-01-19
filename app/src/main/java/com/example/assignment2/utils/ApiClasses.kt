@@ -16,11 +16,6 @@ data class SearchCriteria(
     val pageNumber: Int = 1
 )
 
-data class IdSearchCriteria(
-    val id: Int,
-    val pageNumber: Int = 1
-)
-
 data class MovieResponse(
     val page: Int = 1,
     val results: List<Movie> = listOf<Movie>(),
@@ -52,7 +47,7 @@ data class Genre(
 
 data class ProductionCompany(
     val id: Int = 0,
-    val logoPath: String,
+    @SerializedName("logo_path") val logoPath: String,
     @SerializedName("name") val name: String,
     @SerializedName("origin_country") val originCountry: String
 )
@@ -68,10 +63,17 @@ data class SpokenLanguage(
     val name: String
 )
 
+data class Collection(
+    val id: Int,
+    val name: String,
+    @SerializedName("poster_path") val posterPath: String?,
+    @SerializedName("backdrop_path") val backdropPath: String?
+    )
+
 data class MovieDetail(
     val adult: Boolean,
     @SerializedName("backdrop_path") val backdropPath: String?,
-    @SerializedName("belongs_to_collection") val belongsToCollection: String?,
+    @SerializedName("belongs_to_collection") val belongsToCollection: Collection?,
     val budget: Int,
     val genres: List<Genre>?,
     val homepage: String,
@@ -81,9 +83,9 @@ data class MovieDetail(
     @SerializedName("original_title") val originalTitle: String?,
     val overview: String?,
     val popularity: Double = 0.0,
-    val posterPath: String?,
-    val productionCompanies: List<ProductionCompany>?,
-    val productionCountries: List<ProductionCountry>?,
+    @SerializedName("poster_path") val posterPath: String?,
+    @SerializedName("production_companies") val productionCompanies: List<ProductionCompany>?,
+    @SerializedName("production_countries") val productionCountries: List<ProductionCountry>?,
     @SerializedName("release_date") val releaseDate: String?,
     val revenue: Int = 0,
     val runtime: Int = 0,
@@ -99,17 +101,17 @@ data class MovieDetail(
 data class AuthorDetail(
     val name: String,
     val username: String,
-    val avatarPath: String,
+    @SerializedName("avatar_path") val avatarPath: String,
     val rating: String
 )
 
 data class ReviewResult(
     val author: String,
-    @SerializedName("author_details") val authorDetails: List<AuthorDetail>,
+    @SerializedName("author_details") val authorDetails: AuthorDetail,
     val content: String,
-    val createdAt: String,
+    @SerializedName("created_at") val createdAt: String,
     val id: String,
-    val updatedAt: String,
+    @SerializedName("updated_at") val updatedAt: String,
     val url: String
 )
 

@@ -4,5 +4,10 @@
     <string name="landing">Landing</string>
     <string name="register">Register</string>
     <string name="profile">View Profile</string>
-    <string name="detail">Detail</string>
+    <string name="detail">View Detail</string>
+    <string name="reviews">Reviews</string>
+    <string name="search">Search</string>
+    <string name="similar">View Similar Movies</string>
+    <string name="favourite">View Favourite Movies</string>
+    <string name="favourite_detail">View Favourite Movies</string>
 </resources>

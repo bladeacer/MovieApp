@@ -1,6 +1,7 @@
 package com.example.assignment2.utils
 
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
@@ -10,7 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.sp
-import com.example.assignment2.ui.theme.PurpleGrey40
+import com.example.assignment2.ui.theme.Pink40
+import com.example.assignment2.ui.theme.Purple80
 
 data class AppBarState(
     val title: String = "",
@@ -24,13 +26,10 @@ data class AppBarState(
 fun BaseAppBar(appbarState: AppBarState) {
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = PurpleGrey40,
+            containerColor = Purple80,
             titleContentColor = Color.White,
         ),
-        title = { Text(
-            text = appbarState.title,
-            style = TextStyle(fontSize = 18.sp)
-        ) },
+        title = { Text(appbarState.title) },
         actions = appbarState.actions,
         modifier = appbarState.modifier,
         navigationIcon = appbarState.navigationIcon,
