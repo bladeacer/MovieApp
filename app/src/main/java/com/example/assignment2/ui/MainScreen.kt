@@ -130,8 +130,7 @@ fun MainScreen(viewModel: MyViewModel = viewModel(factory = MyViewModel.factory)
                 )
                 RegisterScreen(
                     viewModel,
-                    { navController.navigate(SwitchScreen.Login.name) },
-                    { navController.navigate(SwitchScreen.Landing.name) }
+                    { navController.navigate(SwitchScreen.Login.name) }
                 )
             }
             composable(SwitchScreen.Profile.name) {

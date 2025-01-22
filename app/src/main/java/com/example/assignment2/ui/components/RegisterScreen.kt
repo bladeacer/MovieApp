@@ -41,8 +41,7 @@ import kotlinx.coroutines.coroutineScope
 @Composable
 fun RegisterScreen(
     viewModel: MyViewModel,
-    onBackButtonClicked: () -> Unit,
-    onRegisterButtonClicked: () -> Unit,
+    onNavActionClicked: () -> Unit,
 
 ) {
     var userName by remember { mutableStateOf("Hint: Enter user name") }
@@ -57,7 +56,7 @@ fun RegisterScreen(
 
     Column(
         modifier = Modifier
-            .padding(top = 95.dp, start = 35.dp)
+            .padding(top = 115.dp, start = 35.dp)
     ) {
 
         Text(
@@ -156,7 +155,7 @@ fun RegisterScreen(
                         showToast = false
                         val user = User(name = userName, email = email, password = password)
                         viewModel.addUser(user)
-                        onRegisterButtonClicked()
+                        onNavActionClicked()
                     }
 
                 },
@@ -171,7 +170,7 @@ fun RegisterScreen(
             }
 
             TextButton(
-                onClick = onBackButtonClicked,
+                onClick = onNavActionClicked,
                 modifier = Modifier
                     .padding(start = 69.dp)
                     .background(Pink80)

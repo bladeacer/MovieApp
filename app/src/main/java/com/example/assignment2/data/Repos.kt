@@ -46,7 +46,6 @@ data class FavouriteMovieTable(
     val userId: Int,
     val adult: Boolean,
     val backdropPath: String?,
-    @PrimaryKey
     val id: Int,
     val originalLanguage: String?,
     val originalTitle: String?,
@@ -57,7 +56,9 @@ data class FavouriteMovieTable(
     val title: String?,
     val video: Boolean,
     val voteAverage: Double,
-    val voteCount: Int
+    val voteCount: Int,
+    @PrimaryKey(autoGenerate = true)
+    val favId: Int = 0,
 )
 
 /**

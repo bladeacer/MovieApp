@@ -74,6 +74,7 @@ class MyViewModel (
     private val _favDetail = MutableStateFlow<FavouriteMovieTable?>(null)
     val favDetail: StateFlow<FavouriteMovieTable?> = _favDetail.asStateFlow()
 
+
     fun addUser(user: User) {
         viewModelScope.launch {
             try {
