@@ -92,9 +92,4 @@ dependencies {
     // JSON serialization library, works with the Kotlin serialization plugin
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
-    implementation(libs.joda.convert)
-    implementation(libs.joda.time)
-    implementation("androidx.browser:browser:1.6.0")
-    implementation("org.jsoup:jsoup:1.16.1")
-
 }

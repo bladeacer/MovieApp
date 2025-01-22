@@ -2,8 +2,6 @@ package com.example.assignment2.ui.components
 
 import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,43 +9,42 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableDoubleStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.assignment2.MyViewModel
+import com.example.assignment2.ui.theme.Pink40
 import com.example.assignment2.ui.theme.Pink80
-import com.example.assignment2.utils.AppBarState
+import com.example.assignment2.ui.theme.Purple40
 
-// TODO: LazyRow top x similar movies, have a separate screen if the users wanted to see more similar movies
 @Composable
 fun DetailScreen(
     viewModel: MyViewModel,
-    onNavigateReview: () -> Unit
+    onNavigateReview: () -> Unit,
+    onNavigateSimilar: () -> Unit,
+    onFavouriteAction: () -> Unit
 ) {
     val movieDetail = viewModel.movieDetail.collectAsState()
+    val isFavMovie = viewModel.isFavMovie.collectAsState()
 
     LaunchedEffect(
         key1 = movieDetail.value
     ) {
         viewModel.fetchDetail()
         Log.d("DetailScreen", "DetailScreen ${movieDetail.value}")
+        viewModel.updateIsFavMovie(false)
+        viewModel.getFavouriteMovieById(movieDetail.value?.id ?: 0)
+
     }
 
     Text(
@@ -103,34 +100,84 @@ fun DetailScreen(
         }
         Text(
             text = "Genres:",
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodyLarge,
         )
         movieDetail.value?.genres?.forEach { genre ->
             Text("- ${genre.name}", style=MaterialTheme.typography.bodyMedium)
         }
         Spacer(modifier = Modifier.height(32.dp))
         Text(
-            text = "Overview: \n${movieDetail.value?.overview}",
-            style = MaterialTheme.typography.headlineSmall
+            text = "Overview: ",
+            style = MaterialTheme.typography.bodyLarge
         )
         Text(
             text = "${movieDetail.value?.overview}",
             style = MaterialTheme.typography.bodyMedium
         )
-        // TODO: Link to Similar movies based on movie id passed here
-
-        TextButton(
-            onClick = { onNavigateReview() },
-            modifier = Modifier
-                .padding(start = 69.dp)
-                .background(Pink80)
-        ) {
-            Text(
-                text = "View Reviews",
-                fontSize = 17.sp,
-                color = Color.White
-            )
+        Spacer(modifier = Modifier.height(16.dp))
+        Row (
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ){
+            TextButton(
+                onClick = { onNavigateReview() },
+                modifier = Modifier
+                    .padding(top = 50.dp)
+                    .background(Pink80)
+            ) {
+                Text(
+                    text = "View Reviews",
+                    fontSize = 17.sp,
+                    color = Color.White
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            TextButton(
+                onClick = { onNavigateSimilar() },
+                modifier = Modifier
+                    .padding(top = 50.dp)
+                    .background(Purple40)
+            ) {
+                Text(
+                    text = "View Similar",
+                    fontSize = 17.sp,
+                    color = Color.White
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            if (!isFavMovie.value) {
+                TextButton(
+                    onClick = {
+                        viewModel.insertFavouriteMovie(movieDetail.value)
+                        onFavouriteAction()
+                    },
+                    modifier = Modifier
+                        .padding(top = 50.dp)
+                        .background(Pink40)
+                ) {
+                    Text(
+                        text = "Favourite",
+                        fontSize = 17.sp,
+                        color = Color.White
+                    )
+                }
+            }
+            else {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteFavouriteMovieById(movieDetail.value?.id ?: 0)
+                        onFavouriteAction()
+                    },
+                    modifier = Modifier
+                        .padding(top = 50.dp)
+                        .background(Pink40)
+                ) {
+                    Text(
+                        text = "Un-favourite",
+                        fontSize = 17.sp,
+                        color = Color.White
+                    )
+                }
+            }
         }
-        // TODO: Navigate to similar from here
     }
 }

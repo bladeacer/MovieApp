@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -57,8 +58,6 @@ fun LoginScreen(
     var showError = remember { mutableStateOf(false) }
     val user = viewModel.user.collectAsState()
     val allowAction = viewModel.allowAction.collectAsState()
-    var loadingStart = remember {mutableStateOf(false)}
-    var loadingEnd = remember {mutableStateOf(false)}
 
     Image(
         painter = painterResource(R.drawable.movie_viewer_logo),
@@ -110,6 +109,8 @@ fun LoginScreen(
 
         }
         Spacer(modifier = Modifier.height(32.dp))
+        Text("You might have to click the login \nbutton twice, it takes a while.")
+        Spacer(modifier = Modifier.height(32.dp))
         Row {
             TextButton(
                 onClick = {
@@ -127,7 +128,7 @@ fun LoginScreen(
             ) {
                 Text(
                     text = "Login",
-                    fontSize = 17.sp,
+                    style = MaterialTheme.typography.bodyLarge,
                     color = Color.White
                 )
             }
@@ -139,7 +140,7 @@ fun LoginScreen(
             ) {
                 Text(
                     text = "Register",
-                    fontSize = 17.sp,
+                    style = MaterialTheme.typography.bodyLarge,
                     color = Color.White
                 )
             }

@@ -12,5 +12,6 @@ enum class SwitchScreen(@StringRes val title: Int) {
     Review(R.string.reviews),
     Search(R.string.search),
     Favourite(R.string.favourite),
-    FavouriteDetail(R.string.favourite_detail)
+    FavouriteDetail(R.string.favourite_detail),
+    Similar(R.string.similar)
 }

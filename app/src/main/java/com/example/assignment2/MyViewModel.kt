@@ -7,6 +7,10 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
+import com.example.assignment2.data.FavouriteMovieRepository
+import com.example.assignment2.data.FavouriteMovieTable
+import com.example.assignment2.data.MovieRepository
+import com.example.assignment2.data.MovieTable
 import com.example.assignment2.data.UsersRepository
 import com.example.assignment2.data.User
 import com.example.assignment2.utils.Movie
@@ -14,6 +18,7 @@ import com.example.assignment2.utils.MovieDetail
 import com.example.assignment2.utils.MovieResponse
 import com.example.assignment2.utils.RequestUrl
 import com.example.assignment2.utils.Review
+import com.example.assignment2.utils.Search
 import com.example.assignment2.utils.SearchCriteria
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,10 +31,12 @@ import kotlinx.coroutines.withContext
 
 
 class MyViewModel (
-    private val usersRepo: UsersRepository
+    private val usersRepo: UsersRepository,
+    private val movieRepo: MovieRepository,
+    private val favouriteMovieRepo: FavouriteMovieRepository
 ) : ViewModel() {
     private val _toggleCriteria = MutableStateFlow(SearchCriteria(RequestUrl.POPULAR.url, 1))
-    val searchCriteria: StateFlow<SearchCriteria> = _toggleCriteria.asStateFlow()
+    val toggleCriteria: StateFlow<SearchCriteria> = _toggleCriteria.asStateFlow()
 
     private val _movieResponse = MutableStateFlow<MovieResponse?>(null)
     val movieResponse: StateFlow<MovieResponse?> = _movieResponse.asStateFlow()
@@ -43,11 +50,11 @@ class MyViewModel (
     private val _review = MutableStateFlow<Review?>(null)
     val review: StateFlow<Review?> = _review.asStateFlow()
 
-    private val _search = MutableStateFlow<SearchCriteria?>(null)
-    val search: StateFlow<SearchCriteria?> = _search.asStateFlow()
+    private val _search = MutableStateFlow<SearchCriteria>(SearchCriteria("", 1))
+    val search: StateFlow<SearchCriteria> = _search.asStateFlow()
 
-    private val _searchResult = MutableStateFlow<MovieResponse?>(null)
-    val searchResult: StateFlow<MovieResponse?> = _searchResult.asStateFlow()
+    private val _searchResult = MutableStateFlow<Search?>(null)
+    val searchResult: StateFlow<Search?> = _searchResult.asStateFlow()
 
     private val _movieId = MutableStateFlow<Int>(0)
     val movieId: StateFlow<Int> = _movieId.asStateFlow()
@@ -57,6 +64,15 @@ class MyViewModel (
 
     private val _user = MutableStateFlow<User?>(null)
     val user: StateFlow<User?> = _user.asStateFlow()
+
+    private val _isFavMovie = MutableStateFlow<Boolean>(false)
+    val isFavMovie: StateFlow<Boolean> = _isFavMovie.asStateFlow()
+
+    private val _favouriteMovies = MutableStateFlow<List<FavouriteMovieTable>>(listOf())
+    val favouriteMovies: StateFlow<List<FavouriteMovieTable>> = _favouriteMovies.asStateFlow()
+
+    private val _favDetail = MutableStateFlow<FavouriteMovieTable?>(null)
+    val favDetail: StateFlow<FavouriteMovieTable?> = _favDetail.asStateFlow()
 
     fun addUser(user: User) {
         viewModelScope.launch {
@@ -72,7 +88,7 @@ class MyViewModel (
             CoroutineScope(Dispatchers.IO).launch {
                 val result = withContext(Dispatchers.IO) {
                     try{
-                       usersRepo.getUserStream(id)
+                        usersRepo.getUserStream(id)
                     } catch (e: Exception) {
                         Log.d("User Response Exception: ", "Message: ${e.message.toString()}\nStack trace: ${e.printStackTrace()}")
                         null
@@ -93,7 +109,7 @@ class MyViewModel (
             CoroutineScope(Dispatchers.IO).launch {
                 val result = withContext(Dispatchers.IO) {
                     try {
-                        MovieApi.retrofitService.getMovies(searchCriteria.value.query, page = searchCriteria.value.pageNumber)
+                        MovieApi.retrofitService.getMovies(toggleCriteria.value.query, page = toggleCriteria.value.pageNumber)
                     } catch (e: Exception) {
                         Log.d("Movie Response Exception: ", "Message: ${e.message.toString()}\nStack trace: ${e.printStackTrace()}")
                         null
@@ -101,6 +117,9 @@ class MyViewModel (
                 }
                 withContext(Dispatchers.Main) {
                     _movieResponse.value = result
+                    result?.results?.forEach { movie ->
+                        insertMovie(movie)
+                    }
                 }
             }
         }
@@ -118,6 +137,9 @@ class MyViewModel (
                 }
                 withContext(Dispatchers.Main) {
                     _similarResponse.value = result
+                    result?.results?.forEach { movie ->
+                        insertMovie(movie)
+                    }
                 }
             }
         }
@@ -158,51 +180,54 @@ class MyViewModel (
         }
     }
 
+    //    TODO: Index keywords for each user,
     fun fetchSearch() {
-        // TODO: There is no way this works
+        // TODO: Refactor search knowing that it is keywords
         viewModelScope.launch {
             CoroutineScope(Dispatchers.IO).launch {
-            }
-            val result = withContext(Dispatchers.IO) {
-                try {
-                    MovieApi.retrofitService.getKeyword(search.value?.query ?: "")
-                } catch (e: Exception) {
-                    Log.d("Movie Response Exception: ", "Message: ${e.message.toString()}\nStack trace: ${e.printStackTrace()}")
-                    null
-                }
-            }
-            withContext(Dispatchers.Main) {
-                var processedMovieList: List<Movie> = listOf<Movie>()
-                result?.results?.forEach { searchEntry ->
-                    val result2 = withContext(Dispatchers.IO) {
-                        try {
-                            MovieApi.retrofitService.getDetailById(searchEntry.id)
-                        } catch (e: Exception) {
-                            Log.d("Movie Response Exception: ", "Message: ${e.message.toString()}\nStack trace: ${e.printStackTrace()}")
-                            null
-                        }
+                val result = withContext(Dispatchers.IO) {
+                    try {
+                        MovieApi.retrofitService.getSearch(search.value.query, search.value.pageNumber)
+                    } catch (e: Exception) {
+                        Log.d("Movie Response Exception: ", "Message: ${e.message.toString()}\nStack trace: ${e.printStackTrace()}")
+                        null
                     }
-                    val result3 = Movie(result2?.adult == false,
-                        result2?.backdropPath, result2?.genres?.map { genre -> genre.id } ?: listOf<Int>(),
-                        result2?.id ?: 0,
-                        result2?.originalLanguage,
-                        result2?.originalTitle,
-                        result2?.overview,
-                        result2?.popularity ?: 0.0,
-                        result2?.posterPath,
-                        result2?.releaseDate,
-                        result2?.title, result2?.video == true, result2?.voteAverage ?: 0.0,
-                        result2?.voteCount ?: 0)
-                    processedMovieList = processedMovieList + result3
                 }
-                val processedResult = MovieResponse(
-                    result?.page ?: 1,
-                    results = processedMovieList,
-                    result?.totalPages ?: 0,
-                    result?.totalResults ?: 0
-                )
-                _searchResult.value = processedResult
+                withContext(Dispatchers.Main) {
+                    _searchResult.value = result
+//                var processedMovieList: List<GenreOrKeyword> = listOf<GenreOrKeyword>()
+//                result?.results?.forEach { searchEntry ->
+//                    val result2 = withContext(Dispatchers.IO) {
+//                        try {
+//                            MovieApi.retrofitService.getDetailById(searchEntry.id)
+//                        } catch (e: Exception) {
+//                            Log.d("Movie Response Exception: ", "Message: ${e.message.toString()}\nStack trace: ${e.printStackTrace()}")
+//                            null
+//                        }
+//                    }
+//                    val result3 = Movie(result2?.adult == false,
+//                        result2?.backdropPath, result2?.genres?.map { genre -> genre.id } ?: listOf<Int>(),
+//                        result2?.id ?: 0,
+//                        result2?.originalLanguage,
+//                        result2?.originalTitle,
+//                        result2?.overview,
+//                        result2?.popularity ?: 0.0,
+//                        result2?.posterPath,
+//                        result2?.releaseDate,
+//                        result2?.title, result2?.video == true, result2?.voteAverage ?: 0.0,
+//                        result2?.voteCount ?: 0)
+//                    processedMovieList = processedMovieList + result3
+//                }
+//                val processedResult = MovieResponse(
+//                    result?.page ?: 1,
+//                    results = processedMovieList,
+//                    result?.totalPages ?: 0,
+//                    result?.totalResults ?: 0
+//                )
+//                _searchResult.value = processedResult
+                }
             }
+
         }
     }
     fun updateUrl(newUrl: String) {
@@ -239,24 +264,110 @@ class MyViewModel (
                     usersRepo.validateLogin(email, password)
 
                 } catch (e: Exception) {
-                    Log.d("Movie Response Exception: ", "Message: ${e.message.toString()}\nStack trace: ${e.printStackTrace()}")
+                    Log.d(
+                        "Movie Response Exception: ",
+                        "Message: ${e.message.toString()}\nStack trace: ${e.printStackTrace()}"
+                    )
                     null
                 }
             }
 
             _allowAction.value = result != null
-            result?.collect { value ->
-                _user.value = value
+            result?.collect {
+                value -> _user.value = value
             }
-
         }
+    }
+    fun insertMovie(movie: Movie) {
+        viewModelScope.launch {
+            try {
+                val newMovie = MovieTable(movie.adult, movie.backdropPath, movie.id,
+                    movie.originalLanguage, movie.originalTitle, movie.overview,
+                    movie.popularity, movie.posterPath, movie.releaseDate, movie.title,
+                    movie.video, movie.voteAverage, movie.voteCount)
+                movieRepo.insertMovie(newMovie)
+            } catch (e: Exception) {
+                Log.d("Response Exception", "Message: ${e.message.toString()}")
+            }
+        }
+    }
+    fun insertFavouriteMovie(movie: MovieDetail?) {
+        viewModelScope.launch {
+            try {
+                if (movie == null) throw Exception("Movie is null")
+                val newMovie = FavouriteMovieTable(
+                    _user.value?.id ?: 0, movie.adult, movie.backdropPath, movie.id,
+                    movie.originalLanguage, movie.originalTitle, movie.overview,
+                    movie.popularity, movie.posterPath, movie.releaseDate, movie.title,
+                    movie.video,  movie.voteAverage, movie.voteCount)
+                favouriteMovieRepo.insertMovie(newMovie)
+            } catch (e: Exception) {
+                Log.d("Response Exception", "Message: ${e.message.toString()}")
+            }
+        }
+    }
+    fun deleteFavouriteMovieById(movieId: Int) {
+        viewModelScope.launch {
+            try {
+                favouriteMovieRepo.deleteFavouriteMovieById(movieId, _user.value?.id ?: 0)
+            } catch (e: Exception) {
+                Log.d("Response Exception", "Message: ${e.message.toString()}")
+            }
+        }
+    }
+    fun getFavouriteMovieById(movieId: Int) {
+        viewModelScope.launch {
+            CoroutineScope(Dispatchers.IO).launch {}
+            val result = withContext(Dispatchers.IO) {
+                try {
+                    favouriteMovieRepo.getMovieStream(movieId, _user.value?.id ?: 0)
+                } catch (e: Exception) {
+                    Log.d("Response Exception", "Message: ${e.message.toString()}")
+                    null
+                }
+            }
+            withContext(Dispatchers.Main) {
+                _isFavMovie.value = result == null
+                result?.collect { value ->
+                    _favDetail.value = value
+                }
+            }
+        }
+
+    }
+    fun getFavouriteMovies() {
+        viewModelScope.launch {
+            CoroutineScope(Dispatchers.IO).launch {}
+            val result = withContext(Dispatchers.IO) {
+                try {
+                    favouriteMovieRepo.getAllMoviesStream(user.value?.id ?: 0)
+                } catch (e: Exception) {
+                    Log.d("Response Exception", "Message: ${e.message.toString()}")
+                    null
+                }
+            }
+            withContext(Dispatchers.Main) {
+                result?.collect {value ->
+                    _favouriteMovies.value = value
+                }
+            }
+        }
+    }
+
+    fun updateIsFavMovie(newIsFav: Boolean) {
+        _isFavMovie.value = newIsFav
+    }
+    fun updateCurrentUser(newUser: User) {
+        _user.value = newUser
     }
 
     companion object {
         val factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val application = (this[APPLICATION_KEY] as MovieApplication)
-                MyViewModel(application.database.userRepoWrapper())
+                MyViewModel(application.database.userRepoWrapper(),
+                    application.database.movieRepoWrapper(),
+                    application.database.favouriteMovieRepoWrapper())
             }
         }
     }

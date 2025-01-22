@@ -1,6 +1,7 @@
 package com.example.assignment2
 
 import com.example.assignment2.utils.MovieDetail
+import com.example.assignment2.utils.MovieKeywords
 import com.example.assignment2.utils.MovieResponse
 import com.example.assignment2.utils.RequestUrl
 import com.example.assignment2.utils.Review
@@ -54,7 +55,7 @@ interface MovieApiService {
         "Accept: application/json",
         "Authorization: Bearer $token"
     )
-    suspend fun getKeyword(
+    suspend fun getSearch(
         @Query("query") query: String,
         @Query("page") page: Int = 1
     ): Search?
@@ -70,6 +71,15 @@ interface MovieApiService {
         @Query("page") page: Int = 1
     ): MovieResponse?
 
+
+    @GET("3/movie/{movie_id}/keywords")
+    @Headers(
+        "Accept: application/json",
+        "Authorization: Bearer $token"
+    )
+    suspend fun getKeyword(
+        @Path("movie_id") movieId: Int = 1,
+    ): MovieKeywords?
 }
 
 val okHttpClient = OkHttpClient.Builder()
@@ -87,10 +97,4 @@ object MovieApi {
     val retrofitService: MovieApiService by lazy {
         retrofit.create(MovieApiService::class.java)
     }
-}
-
-sealed class UiState<out T> {
-    object Loading : UiState<Nothing>()
-    data class Success<T>(val data: T) : UiState<T>()
-    data class Error(val message: String) : UiState<Nothing>()
 }

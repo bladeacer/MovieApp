@@ -40,7 +40,7 @@ data class Movie(
     @SerializedName("vote_count") val voteCount: Int
 )
 
-data class Genre(
+data class GenreOrKeyword(
     val id: Int = 0,
     val name: String
 )
@@ -68,14 +68,14 @@ data class Collection(
     val name: String,
     @SerializedName("poster_path") val posterPath: String?,
     @SerializedName("backdrop_path") val backdropPath: String?
-    )
+)
 
 data class MovieDetail(
     val adult: Boolean,
     @SerializedName("backdrop_path") val backdropPath: String?,
     @SerializedName("belongs_to_collection") val belongsToCollection: Collection?,
     val budget: Int,
-    val genres: List<Genre>?,
+    val genres: List<GenreOrKeyword>?,
     val homepage: String,
     val id: Int = 0,
     @SerializedName("imdb_id") val imdbID: String?,
@@ -134,4 +134,9 @@ data class Search(
     val results: List<SearchEntry>,
     @SerializedName("total_pages") val totalPages: Int,
     @SerializedName("total_results") val totalResults: Int
+)
+
+data class MovieKeywords(
+    val id: Int = 0,
+    val keywords: List<GenreOrKeyword>
 )
