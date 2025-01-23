@@ -27,6 +27,7 @@ import com.example.assignment2.ui.components.FavDetailScreen
 import com.example.assignment2.ui.components.FavouriteScreen
 import com.example.assignment2.ui.components.LandingScreen
 import com.example.assignment2.ui.components.LoginScreen
+import com.example.assignment2.ui.components.OfflineDetailScreen
 import com.example.assignment2.ui.components.ProfileScreen
 import com.example.assignment2.ui.components.RegisterScreen
 import com.example.assignment2.ui.components.ReviewScreen
@@ -114,7 +115,9 @@ fun MainScreen(viewModel: MyViewModel = viewModel(factory = MyViewModel.factory)
                     navController.navigate(SwitchScreen.Detail.name)
                 }, onTriggerSearch = {
                     navController.navigate(SwitchScreen.Search.name)
-                } )
+                } , onClickOfflineMovieItem = {
+                    navController.navigate(SwitchScreen.OfflineDetail.name)
+                })
             }
             composable(SwitchScreen.Register.name) {
                 appBarState.value = AppBarState( title = SwitchScreen.Register.name,
@@ -193,7 +196,9 @@ fun MainScreen(viewModel: MyViewModel = viewModel(factory = MyViewModel.factory)
                             )
                         }
                     }, actions = {})
-                SearchScreen(viewModel, innerPadding)
+                SearchScreen(viewModel, innerPadding, onClickMovieItem = {
+                    navController.navigate(SwitchScreen.Detail.name)
+                })
             }
             // TODO: Similar, search screen, favourite movie list
             composable(SwitchScreen.Similar.name) {
@@ -236,6 +241,19 @@ fun MainScreen(viewModel: MyViewModel = viewModel(factory = MyViewModel.factory)
                         }
                     }, actions = {})
                 FavDetailScreen(viewModel, onDelete = {navController.navigate(SwitchScreen.Favourite.name)})
+            }
+            composable(SwitchScreen.OfflineDetail.name) {
+                appBarState.value = AppBarState(title= SwitchScreen.OfflineDetail.name,
+                    navigationIcon = {
+                        IconButton(onClick = { navController.navigate(SwitchScreen.Landing.name)}) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back",
+                                tint = Color.White
+                            )
+                        }
+                    }, actions = {})
+                OfflineDetailScreen(viewModel)
             }
 
         }

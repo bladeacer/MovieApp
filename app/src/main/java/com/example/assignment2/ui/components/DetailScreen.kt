@@ -18,6 +18,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,7 +33,7 @@ fun DetailScreen(
     viewModel: MyViewModel,
     onNavigateReview: () -> Unit,
     onNavigateSimilar: () -> Unit,
-    onFavouriteAction: () -> Unit
+    onFavouriteAction: () -> Unit,
 ) {
     val movieDetail = viewModel.movieDetail.collectAsState()
     val isFavMovie = viewModel.isFavMovie.collectAsState()
@@ -42,11 +43,9 @@ fun DetailScreen(
     ) {
         viewModel.fetchDetail()
         Log.d("DetailScreen", "DetailScreen ${movieDetail.value}")
-        viewModel.updateIsFavMovie(false)
         viewModel.getFavouriteMovieById(movieDetail.value?.id ?: 0)
 
     }
-
     Text(
         text = "${movieDetail.value?.title}",
         style = MaterialTheme.typography.headlineSmall,
@@ -144,7 +143,27 @@ fun DetailScreen(
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
-            if (!isFavMovie.value) {
+            if (isFavMovie.value) {
+
+                TextButton(
+                    onClick = {
+                        viewModel.deleteFavouriteMovieById(movieDetail.value?.id ?: 0)
+                        onFavouriteAction()
+                    },
+                    modifier = Modifier
+                        .padding(top = 50.dp)
+                        .background(Pink40)
+                ) {
+                    Text(
+                        text = "Un-favourite",
+                        fontSize = 17.sp,
+                        color = Color.White
+                    )
+                }
+
+            }
+            else {
+
                 TextButton(
                     onClick = {
                         viewModel.insertFavouriteMovie(movieDetail.value)
@@ -161,23 +180,8 @@ fun DetailScreen(
                     )
                 }
             }
-            else {
-                TextButton(
-                    onClick = {
-                        viewModel.deleteFavouriteMovieById(movieDetail.value?.id ?: 0)
-                        onFavouriteAction()
-                    },
-                    modifier = Modifier
-                        .padding(top = 50.dp)
-                        .background(Pink40)
-                ) {
-                    Text(
-                        text = "Un-favourite",
-                        fontSize = 17.sp,
-                        color = Color.White
-                    )
-                }
-            }
+
         }
+
     }
 }

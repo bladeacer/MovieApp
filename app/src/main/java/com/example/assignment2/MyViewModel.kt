@@ -1,5 +1,6 @@
 package com.example.assignment2
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -16,6 +17,7 @@ import com.example.assignment2.data.User
 import com.example.assignment2.utils.Movie
 import com.example.assignment2.utils.MovieDetail
 import com.example.assignment2.utils.MovieResponse
+import com.example.assignment2.utils.NetworkCheck
 import com.example.assignment2.utils.RequestUrl
 import com.example.assignment2.utils.Review
 import com.example.assignment2.utils.Search
@@ -35,6 +37,7 @@ class MyViewModel (
     private val movieRepo: MovieRepository,
     private val favouriteMovieRepo: FavouriteMovieRepository
 ) : ViewModel() {
+
     private val _toggleCriteria = MutableStateFlow(SearchCriteria(RequestUrl.POPULAR.url, 1))
     val toggleCriteria: StateFlow<SearchCriteria> = _toggleCriteria.asStateFlow()
 
@@ -53,8 +56,8 @@ class MyViewModel (
     private val _search = MutableStateFlow<SearchCriteria>(SearchCriteria("", 1))
     val search: StateFlow<SearchCriteria> = _search.asStateFlow()
 
-    private val _searchResult = MutableStateFlow<Search?>(null)
-    val searchResult: StateFlow<Search?> = _searchResult.asStateFlow()
+    private val _searchResult = MutableStateFlow<MovieResponse?>(null)
+    val searchResult: StateFlow<MovieResponse?> = _searchResult.asStateFlow()
 
     private val _movieId = MutableStateFlow<Int>(0)
     val movieId: StateFlow<Int> = _movieId.asStateFlow()
@@ -74,7 +77,18 @@ class MyViewModel (
     private val _favDetail = MutableStateFlow<FavouriteMovieTable?>(null)
     val favDetail: StateFlow<FavouriteMovieTable?> = _favDetail.asStateFlow()
 
+    private val _isOnline = MutableStateFlow<Boolean>(true)
+    val isOnline: StateFlow<Boolean> = _isOnline.asStateFlow()
 
+    private val _offlineMovies = MutableStateFlow<List<MovieTable>>(listOf())
+    val offlineMovies: StateFlow<List<MovieTable>> = _offlineMovies.asStateFlow()
+
+    private val _offlineMovie = MutableStateFlow<MovieTable?>(null)
+    val offlineMovie: StateFlow<MovieTable?> = _offlineMovie.asStateFlow()
+
+    fun isOnline(context: Context) {
+        _isOnline.value = NetworkCheck(context).isInternetAvailable()
+    }
     fun addUser(user: User) {
         viewModelScope.launch {
             try {
@@ -275,7 +289,7 @@ class MyViewModel (
 
             _allowAction.value = result != null
             result?.collect {
-                value -> _user.value = value
+                    value -> _user.value = value
             }
         }
     }
@@ -287,6 +301,18 @@ class MyViewModel (
                     movie.popularity, movie.posterPath, movie.releaseDate, movie.title,
                     movie.video, movie.voteAverage, movie.voteCount)
                 movieRepo.insertMovie(newMovie)
+            } catch (e: Exception) {
+                Log.d("Response Exception", "Message: ${e.message.toString()}")
+            }
+        }
+    }
+    fun getOfflineMovies() {
+        viewModelScope.launch {
+            try {
+                 val result = movieRepo.getAllMoviesStream()
+                result.collect {
+                    value -> _offlineMovies.value = value
+                }
             } catch (e: Exception) {
                 Log.d("Response Exception", "Message: ${e.message.toString()}")
             }
@@ -350,6 +376,24 @@ class MyViewModel (
             withContext(Dispatchers.Main) {
                 result?.collect {value ->
                     _favouriteMovies.value = value
+                }
+            }
+        }
+    }
+    fun getOfflineMovieById() {
+        viewModelScope.launch{
+            CoroutineScope(Dispatchers.IO).launch {}
+            val result = withContext(Dispatchers.IO) {
+                try {
+                    movieRepo.getMovieStream(_movieId.value)
+                } catch (e: Exception) {
+                    Log.d("Response Exception", "Message: ${e.message.toString()}")
+                    null
+                }
+            }
+            withContext(Dispatchers.Main) {
+                result?.collect {value ->
+                    _offlineMovie.value = value
                 }
             }
         }

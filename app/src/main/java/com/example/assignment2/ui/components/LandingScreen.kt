@@ -50,6 +50,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.assignment2.MyViewModel
+import com.example.assignment2.data.MovieTable
 import com.example.assignment2.ui.theme.Pink80
 import com.example.assignment2.utils.Movie
 import com.example.assignment2.utils.NetworkCheck
@@ -61,86 +62,94 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun LandingScreen(viewModel: MyViewModel, contentPadding: PaddingValues,
-                  onClickMovieItem: () -> Unit, onTriggerSearch: () -> Unit) {
+                  onClickMovieItem: () -> Unit, onTriggerSearch: () -> Unit, onClickOfflineMovieItem: () -> Unit) {
     val movieResponse = viewModel.movieResponse.collectAsState()
     val toggleCriteria = viewModel.toggleCriteria.collectAsState()
+    val isOnline = viewModel.isOnline.collectAsState()
+    val offlineMovies = viewModel.offlineMovies.collectAsState()
+    var offlineList = offlineMovies.value
     var expanded by remember { mutableStateOf(false) }
     var selectedIndex by remember { mutableIntStateOf(0) }
     val searchInput = remember { mutableStateOf("") }
     val urls = RequestUrl.entries.toList()
+    val context = LocalContext.current
 
     LaunchedEffect(
         key1 = toggleCriteria.value
     ) {
+        viewModel.isOnline(context)
         viewModel.fetchMovies()
+        viewModel.getOfflineMovies()
     }
 
     Column (
         modifier = Modifier.padding( start = 16.dp, top = 135.dp, end = 16.dp, bottom = 16.dp)
     ){
-        Row {
+        if (isOnline.value) {
             Row {
-                Box {
-                    TextButton(
-                        onClick = {expanded = true},
-                        colors = ButtonDefaults.textButtonColors(
-                            containerColor = Color.LightGray, // Background color
-                            contentColor = Color.Black // Text color
-                        )
-                    ) {
-                        Text(
-                            text = urls[selectedIndex].name.toTitleCase(),
-                            modifier = Modifier
-                                .padding(8.dp)
-                        )
-                        Icon(
-                            imageVector = Icons.Filled.ArrowDropDown,
-                            contentDescription = "Dropdown arrow"
-                        )
-                    }
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        urls.forEachIndexed { index, url ->
-                            DropdownMenuItem(
-                                text = {
-                                    Text(text = url.name.toTitleCase())
-                                },
-                                onClick = {
-                                    selectedIndex = index
-                                    viewModel.updateUrl(url.getEndpoint())
-                                    expanded = false
-                                })
+                Row {
+                    Box {
+                        TextButton(
+                            onClick = {expanded = true},
+                            colors = ButtonDefaults.textButtonColors(
+                                containerColor = Color.LightGray, // Background color
+                                contentColor = Color.Black // Text color
+                            )
+                        ) {
+                            Text(
+                                text = urls[selectedIndex].name.toTitleCase(),
+                                modifier = Modifier
+                                    .padding(8.dp)
+                            )
+                            Icon(
+                                imageVector = Icons.Filled.ArrowDropDown,
+                                contentDescription = "Dropdown arrow"
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false }
+                        ) {
+                            urls.forEachIndexed { index, url ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(text = url.name.toTitleCase())
+                                    },
+                                    onClick = {
+                                        selectedIndex = index
+                                        viewModel.updateUrl(url.getEndpoint())
+                                        expanded = false
+                                    })
+                            }
                         }
                     }
                 }
-            }
-            Row {
-                Text("Page Number: ")
-                Spacer(modifier = Modifier.width(16.dp))
-                TextField(
-                    value = toggleCriteria.value.pageNumber.toString(),
-                    onValueChange = { newPageNumber ->
-                        viewModel.updatePageNumber(newPageNumber)
-                    },
-                    keyboardOptions = KeyboardOptions(
-                        showKeyboardOnFocus = true,
-                        keyboardType = KeyboardType.Number),
-                    modifier = Modifier.width(50.dp)
+                Row {
+                    Text("Page Number: ")
+                    Spacer(modifier = Modifier.width(16.dp))
+                    TextField(
+                        value = toggleCriteria.value.pageNumber.toString(),
+                        onValueChange = { newPageNumber ->
+                            viewModel.updatePageNumber(newPageNumber)
+                        },
+                        keyboardOptions = KeyboardOptions(
+                            showKeyboardOnFocus = true,
+                            keyboardType = KeyboardType.Number),
+                        modifier = Modifier.width(50.dp)
+                    )
+                }
+                Text(
+                    text = "out of ${movieResponse.value?.totalPages ?: ""}"
                 )
+
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "out of ${movieResponse.value?.totalPages ?: ""}"
+                text = "Total results: ${movieResponse.value?.totalResults ?: ""}"
             )
-
-
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "Total results: ${movieResponse.value?.totalResults ?: ""}"
-        )
         Spacer(modifier = Modifier.height(16.dp))
         Row {
             TextField(
@@ -175,16 +184,32 @@ fun LandingScreen(viewModel: MyViewModel, contentPadding: PaddingValues,
             }
         }
         Spacer(modifier = Modifier.height(32.dp))
-        LazyColumn (
-            modifier = Modifier.padding(horizontal = contentPadding.calculateBottomPadding(), vertical = 8.dp)
-        ){
-            items(
-                items = movieResponse.value?.results ?: listOf<Movie>(), key = { movie: Movie -> movie.id }, itemContent = {
-                        movie ->
-                    LandingScreenMovieItem(movie, viewModel, onClickMovieItem)
+        if (isOnline.value) {
+            LazyColumn (
+                modifier = Modifier.padding(horizontal = contentPadding.calculateBottomPadding(), vertical = 8.dp)
+            ){
+                items(
+                    items = movieResponse.value?.results ?: listOf<Movie>(), key = { movie: Movie -> movie.id }, itemContent = {
+                            movie ->
+                        LandingScreenMovieItem(movie, viewModel, onClickMovieItem)
 
-                }
-            )
+                    }
+                )
+            }
+        }
+        else {
+            LazyColumn (
+                modifier = Modifier.padding(horizontal = contentPadding.calculateBottomPadding(), vertical = 8.dp)
+            ){
+                items(
+                    count = offlineList.size,
+                    itemContent = {index ->
+                       val movie = offlineList[index]
+                        OfflineMovieItem(movie, viewModel, onClickOfflineMovieItem)
+                    }
+                )
+
+            }
         }
     }
 
@@ -222,6 +247,60 @@ fun LandingScreenMovieItem(movie: Movie, viewModel: MyViewModel, onClickMovieIte
                 modifier = Modifier.size(125.dp)
             )
             Spacer(modifier = Modifier.width(16.dp))
+            Column {
+                Text(
+                    text = movie.title ?: "Unknown Title",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "Popularity: ${movie.popularity}",
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Text(
+                    text = "Language: ${movie.originalLanguage}",
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Text(
+                    text = "Release Date: ${movie.releaseDate}",
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Text(
+                    text = "Average Vote: ${movie.voteAverage}",
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Text(
+                    text = "Popularity: ${movie.voteCount}",
+                    style = MaterialTheme.typography.bodySmall
+                )
+
+            }
+        }
+    }
+}
+
+@Composable
+fun OfflineMovieItem(movie: MovieTable, viewModel: MyViewModel, onClickMovieItem: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .clickable(
+                enabled = true,
+                onClick = {
+                    Log.d("Movie Response Sent Id", "${movie.id}")
+                    viewModel.updateMovieId(movie.id)
+                    onClickMovieItem()
+                }
+            ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Column {
                 Text(
                     text = movie.title ?: "Unknown Title",

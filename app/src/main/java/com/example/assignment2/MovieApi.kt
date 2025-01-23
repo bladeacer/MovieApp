@@ -50,7 +50,7 @@ interface MovieApiService {
         @Query("page") page: Int = 1
     ): Review?
 
-    @GET("3/search/keyword")
+    @GET("3/search/movie")
     @Headers(
         "Accept: application/json",
         "Authorization: Bearer $token"
@@ -58,7 +58,7 @@ interface MovieApiService {
     suspend fun getSearch(
         @Query("query") query: String,
         @Query("page") page: Int = 1
-    ): Search?
+    ): MovieResponse?
 
     @GET("3/movie/{movie_id}/similar")
     @Headers(

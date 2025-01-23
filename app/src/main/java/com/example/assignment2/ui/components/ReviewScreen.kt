@@ -16,6 +16,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.assignment2.MyViewModel
@@ -27,25 +28,33 @@ fun ReviewScreen(
 ) {
     val review = viewModel.review.collectAsState()
     var reviewList = review.value?.results
+    val context = LocalContext.current
+    val isOnline = viewModel.isOnline.collectAsState()
     LaunchedEffect(
         key1 = review.value
     ) {
+        viewModel.isOnline(context)
         viewModel.fetchReviews()
     }
     Column (
         modifier = Modifier.padding( start = 16.dp, top = 200.dp, end = 16.dp, bottom = 16.dp),
     )
     {
-        Text("Page: ${review.value?.page}")
-        Text("Total pages: ${review.value?.totalPages}")
-        LazyColumn  {
-            items(
-                count = reviewList?.size ?: 0,
-                itemContent = { index ->
-                    val reviewItem = reviewList?.get(index)
-                    ReviewItem(reviewItem)
-                }
-            )
+        if (isOnline.value) {
+            Text("Page: ${review.value?.page}")
+            Text("Total pages: ${review.value?.totalPages}")
+            LazyColumn  {
+                items(
+                    count = reviewList?.size ?: 0,
+                    itemContent = { index ->
+                        val reviewItem = reviewList?.get(index)
+                        ReviewItem(reviewItem)
+                    }
+                )
+            }
+        }
+        else {
+            Text("No internet connection")
         }
     }
 }
@@ -67,7 +76,6 @@ fun ReviewItem(review: ReviewResult?) {
         Text("Rating: ${review?.authorDetails?.rating}")
         Text("Username: ${review?.authorDetails?.username}")
         Text("Created at: ${review?.createdAt}")
-        Text("Click to open me in a browser.")
         Spacer(modifier = Modifier.height(16.dp))
         Text("Content:\n${review?.content ?: ""}")
     }

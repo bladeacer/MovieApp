@@ -30,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.assignment2.MyViewModel
@@ -39,13 +40,16 @@ import com.example.assignment2.utils.SearchCriteria
 import com.example.assignment2.utils.SearchEntry
 
 @Composable
-fun SearchScreen(viewModel: MyViewModel, contentPadding: PaddingValues) {
+fun SearchScreen(viewModel: MyViewModel, contentPadding: PaddingValues, onClickMovieItem: () -> Unit) {
     val searchResult = viewModel.searchResult.collectAsState()
     val searchKeyword = viewModel.search.collectAsState()
     val searchInput = remember { mutableStateOf("") }
+    val context = LocalContext.current
+    val isOnline = viewModel.isOnline.collectAsState()
     LaunchedEffect(
         key1 = searchKeyword.value
     ) {
+        viewModel.isOnline(context)
         viewModel.fetchSearch()
         Log.d("Search Keyword", "${searchKeyword.value}")
         Log.d("Search Result", "${searchResult.value}")
@@ -55,65 +59,60 @@ fun SearchScreen(viewModel: MyViewModel, contentPadding: PaddingValues) {
     Column(
         modifier = Modifier.padding(start = 16.dp, top = 135.dp, end = 16.dp, bottom = 16.dp)
     ) {
-        Row {
-            TextField(
-                label = {
-                    Icon(Icons.Default.Search, "Search Icon")
-                },
-                value = searchInput.value.toString(),
-                onValueChange = { newSearch ->
-                    searchInput.value = newSearch
-                },
-                keyboardOptions = KeyboardOptions(
-                    showKeyboardOnFocus = true,
-                    keyboardType = KeyboardType.Text
-                ),
-                modifier = Modifier.width(150.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
+        if (isOnline.value) {
 
-            TextButton(
-                onClick = {
-                    viewModel.updateSearch(SearchCriteria(searchInput.value, 1))
-                },
-                modifier = Modifier
-                    .padding(start = 69.dp)
-                    .background(Pink80)
-            ) {
-                Text(
-                    text = "Search",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Color.White
+            Row {
+                TextField(
+                    label = {
+                        Icon(Icons.Default.Search, "Search Icon")
+                    },
+                    value = searchInput.value.toString(),
+                    onValueChange = { newSearch ->
+                        searchInput.value = newSearch
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        showKeyboardOnFocus = true,
+                        keyboardType = KeyboardType.Text
+                    ),
+                    modifier = Modifier.width(150.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+
+                TextButton(
+                    onClick = {
+                        viewModel.updateSearch(SearchCriteria(searchInput.value, 1))
+                    },
+                    modifier = Modifier
+                        .padding(start = 69.dp)
+                        .background(Pink80)
+                ) {
+                    Text(
+                        text = "Search",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.White
+                    )
+                }
+
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            LazyColumn (
+                modifier = Modifier.padding(horizontal = contentPadding.calculateBottomPadding(), vertical = 8.dp)
+            ){
+                items(
+                    items = searchResult.value?.results ?: listOf<Movie>(), key = { movie: Movie -> movie.id }, itemContent = {
+                            movie ->
+                        LandingScreenMovieItem(movie, viewModel, onClickMovieItem)
+
+                    }
                 )
             }
 
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-        LazyColumn (
-            modifier = Modifier.padding(horizontal = contentPadding.calculateBottomPadding(), vertical = 8.dp)
-        ){
-            items(
-                items = searchResult.value?.results ?: listOf<SearchEntry>(), key = {searchEntry: SearchEntry -> searchEntry.id }, itemContent = {
-                        searchEntry ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                    ) {
-                        Column (
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                           Text("Name: ${searchEntry.name}}")
-                        }
-                    }
-                }
-            )
+        else {
+            Text("No internet connection")
         }
+
     }
 }

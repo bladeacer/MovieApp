@@ -10,4 +10,5 @@
     <string name="similar">Home > Similar </string>
     <string name="favourite">Home > Favourite </string>
     <string name="favourite_detail"> Home > Favourite > View Movie </string>
+    <string name="offline_detail"> Home > View Movie</string>
 </resources>

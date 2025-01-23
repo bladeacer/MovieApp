@@ -20,6 +20,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -29,9 +30,12 @@ import com.example.assignment2.data.FavouriteMovieTable
 @Composable
 fun FavouriteScreen(viewModel: MyViewModel, contentPadding: PaddingValues, onClickMovieItem: () -> Unit) {
     val favouriteMovies = viewModel.favouriteMovies.collectAsState()
+    val context = LocalContext.current
+    val isOnline = viewModel.isOnline.collectAsState()
     LaunchedEffect(
         key1 = favouriteMovies.value
     ) {
+        viewModel.isOnline(context)
         viewModel.getFavouriteMovies()
     }
 
@@ -39,18 +43,24 @@ fun FavouriteScreen(viewModel: MyViewModel, contentPadding: PaddingValues, onCli
         modifier = Modifier.padding( start = 16.dp, top = 135.dp, end = 16.dp, bottom = 16.dp)
     ){
 
-        LazyColumn (
-            modifier = Modifier.padding(horizontal = contentPadding.calculateBottomPadding(), vertical = 8.dp)
-        ){
-            items(
-                count = favouriteMovies.value.size,
-                itemContent = { index ->
-                    val movieItem = favouriteMovies.value[index]
-                    FavouriteScreenMovieItem(movieItem, viewModel, onClickMovieItem)
-                }
+        if (isOnline.value) {
+            LazyColumn (
+                modifier = Modifier.padding(horizontal = contentPadding.calculateBottomPadding(), vertical = 8.dp)
+            ){
+                items(
+                    count = favouriteMovies.value.size,
+                    itemContent = { index ->
+                        val movieItem = favouriteMovies.value[index]
+                        FavouriteScreenMovieItem(movieItem, viewModel, onClickMovieItem)
+                    }
 
-            )
+                )
+            }
         }
+        else {
+            Text("No internet connection")
+        }
+
     }
 }
 
